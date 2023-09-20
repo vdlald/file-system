@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 
 @Slf4j
 @Component
@@ -30,9 +32,15 @@ public class CreateFileSystemOperation {
 
         channel.position(0);
 
+        log.debug("saving metadata");
+        String createdAt = ZonedDateTime.now().format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+        ByteBuffer createdAtBytes = ByteBuffer.wrap(createdAt.getBytes(StandardCharsets.UTF_8));
+        channel.write(createdAtBytes);
+        channel.close();
+
         log.debug("created new FS");
         return FileSystem.builder()
-                .content(channel)
+                .content(Files.newByteChannel(savePlace, READ, WRITE))
                 .whereStored(savePlace)
                 .build();
     }

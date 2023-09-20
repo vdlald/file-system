@@ -37,12 +37,13 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 
 [x] T-0. Base project template
 [x] T-1. Creating FS file
-[ ] T-4. Store metadata in FS
+[x] T-4. Store metadata in FS
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
 
 [ ] P-1. Two files with same name problem
-[ ] P-2. FS initial max size is 2GB problem 
+[ ] P-2. FS initial max size is only 2GB
+[ ] P-3. The initial metadata size should not be in the initial metadata size
 
 
 ## T-1. Creating FS file
