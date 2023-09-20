@@ -30,12 +30,28 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 
 [ ] Q-5. Should the file system be hierarchical?
 
+[ ] Q-6. Fast write or fast read?
+
 
 # Tasks
 
 [x] T-0. Base project template
-[ ] T-1. Creating FS file
+[x] T-1. Creating FS file
+[ ] T-4. Store metadata in FS
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
-[ ] T-4. Two files with same name problem
-...
+
+[ ] P-1. Two files with same name problem
+[ ] P-2. FS initial max size is 2GB problem 
+
+
+## T-1. Creating FS file
+
+I will use Indexed Allocation as File Allocation Method
+
+
+# Researching
+
+1. https://www.geeksforgeeks.org/file-systems-in-operating-system/
+2. https://github.com/seclerp/FileFS/blob/master/docs/Architecture-overview.md
+

@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 
 public interface FileSystemOperations {
 
+    void createFileSystem(CreateFileSystemRequest createFileSystemRequest);
+
     void createFile(CreateFileRequest createFileRequest);
 
     ByteArrayOutputStream readFile(String fileName);
