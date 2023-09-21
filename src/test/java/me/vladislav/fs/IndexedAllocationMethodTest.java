@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -17,16 +16,16 @@ public class IndexedAllocationMethodTest extends AbstractFileSystemTest {
     @DisplayName("Метод аллокации / Индексированный метод / Чтение блока")
     void testReadBlock() throws Exception {
         testWithFileSystem(fileSystem -> {
-            fileSystem.setStartPosition();
+            AllocatedSpace allocatedSpace = fileSystem.getAllocatedSpace();
 
             IndexedAllocationMethod method = IndexedAllocationMethod.builder()
-                    .fileSystem(fileSystem)
-                    .blockSize(IndexedAllocationMethod.BlockSize.KB_4)
+                    .allocatedSpace(allocatedSpace)
+                    .blockSize(BlockSize.KB_4)
                     .build();
 
             String expected = UUID.randomUUID().toString();
-            SeekableByteChannel content = fileSystem.getContent();
-            content.write(ByteBuffer.wrap(expected.getBytes(UTF_8)));
+            allocatedSpace.position(0);
+            allocatedSpace.write(ByteBuffer.wrap(expected.getBytes(UTF_8)));
 
             byte[] block = method.readBlock(0).array();
             String actualData = new String(Arrays.copyOfRange(block, 0, expected.length()), UTF_8);
@@ -45,11 +44,9 @@ public class IndexedAllocationMethodTest extends AbstractFileSystemTest {
     @DisplayName("Метод аллокации / Индексированный метод / Запись в блок")
     void testWriteBlock() throws Exception {
         testWithFileSystem(fileSystem -> {
-            fileSystem.setStartPosition();
-
             IndexedAllocationMethod method = IndexedAllocationMethod.builder()
-                    .fileSystem(fileSystem)
-                    .blockSize(IndexedAllocationMethod.BlockSize.KB_4)
+                    .allocatedSpace(fileSystem.getAllocatedSpace())
+                    .blockSize(BlockSize.KB_4)
                     .build();
 
             String expected = UUID.randomUUID().toString();

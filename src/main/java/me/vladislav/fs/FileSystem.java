@@ -6,85 +6,30 @@ import lombok.Getter;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Builder(toBuilder = true)
 public class FileSystem implements Closeable {
 
-    private static final int METADATA_BYTES_SIZE = 46;
-
     @Getter
-    private final Path whereStored;
+    private final Metadata metadata;
 
-    private final SeekableByteChannel content;
-
-    public Metadata getMetadata() throws IOException {
-        long position = content.position();
-
-        ByteBuffer createdAtRaw = ByteBuffer.allocate(METADATA_BYTES_SIZE);
-        content.position(0).read(createdAtRaw);
-        String createdAtStr = new String(createdAtRaw.array(), StandardCharsets.UTF_8);
-
-        ZonedDateTime createdAt = ZonedDateTime.parse(createdAtStr, DateTimeFormatter.ISO_ZONED_DATE_TIME);
-        Metadata metadata = Metadata.builder()
-                .createdAt(createdAt)
-                .build();
-
-        content.position(position);
-        return metadata;
-    }
-
-    public void setStartPosition() throws IOException {
-        content.position(METADATA_BYTES_SIZE);
-    }
-
-    public long getCurrentPosition() throws IOException {
-        return content.position() - METADATA_BYTES_SIZE;
-    }
-
-    public void movePosition(long amountOfBytesToMove) throws IOException {
-        long position = content.position();
-        content.position(position + amountOfBytesToMove);
-    }
-
-    public void setPosition(long position) throws IOException {
-        content.position(METADATA_BYTES_SIZE + position);
-    }
-
-    public void read(ByteBuffer dst) throws IOException {
-        content.read(dst);
-    }
-
-    public void write(ByteBuffer src) throws IOException {
-        content.write(src);
-    }
-
-    public long getAllocatedSize() throws IOException {
-        return content.size();
-    }
-
-    public long getAvailableToUseSize() throws IOException {
-        return getAllocatedSize() - METADATA_BYTES_SIZE;
-    }
-
-    @VisibleForTesting
-    SeekableByteChannel getContent() {
-        return content;
-    }
+    @Getter(onMethod = @__(@VisibleForTesting))
+    private final AllocatedSpace allocatedSpace;
 
     @Override
     public void close() throws IOException {
-        content.close();
+        allocatedSpace.close();
     }
 
     @Getter
     @Builder
     public static class Metadata {
+        public static final int FAM_SIZE = 3;
+        public static final int CREATED_AT_SIZE = 25;
+        public static final int TOTAL_SIZE = CREATED_AT_SIZE + FAM_SIZE;
+
         private final ZonedDateTime createdAt;
+        private final String fileAllocationMethod;
     }
 }

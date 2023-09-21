@@ -1,4 +1,4 @@
-package me.vladislav.fs;
+package me.vladislav.fs.requests;
 
 import jakarta.annotation.Nonnull;
 import lombok.Builder;

@@ -1,6 +1,9 @@
 package me.vladislav.fs;
 
 import me.vladislav.fs.operations.CreateFileSystemOperation;
+import me.vladislav.fs.operations.InitIndexedAllocationMethod;
+import me.vladislav.fs.operations.OpenFileSystemOperation;
+import me.vladislav.fs.requests.CreateFileSystemRequest;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
@@ -12,7 +15,10 @@ public class AbstractFileSystemTest {
 
     public static final int MB_8 = 1048576;
 
-    protected final CreateFileSystemOperation createFileSystemOperation = new CreateFileSystemOperation();
+    protected final InitIndexedAllocationMethod initIndexedAllocationMethod = new InitIndexedAllocationMethod();
+    protected final OpenFileSystemOperation openFileSystemOperation = new OpenFileSystemOperation();
+    protected final CreateFileSystemOperation createFileSystemOperation = new CreateFileSystemOperation(
+            openFileSystemOperation, initIndexedAllocationMethod);
 
     protected Path tempDirectory;
 
@@ -26,6 +32,7 @@ public class AbstractFileSystemTest {
                 .whereToStore(tempDirectory)
                 .fileSystemName(UUID.randomUUID().toString())
                 .initialSizeInBytes(MB_8)
+                .fileAllocationMethod(CreateFileSystemRequest.FileAllocationMethodType.INDEX_ALLOCATION)
                 .build();
 
         try (FileSystem fileSystem = createFileSystemOperation.createFileSystem(request)) {

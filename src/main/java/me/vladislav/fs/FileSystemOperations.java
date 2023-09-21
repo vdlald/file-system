@@ -1,5 +1,8 @@
 package me.vladislav.fs;
 
+import me.vladislav.fs.requests.CreateFileRequest;
+import me.vladislav.fs.requests.CreateFileSystemRequest;
+
 import java.io.ByteArrayOutputStream;
 
 public interface FileSystemOperations {

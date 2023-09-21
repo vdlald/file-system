@@ -1,0 +1,17 @@
+@startuml
+
+AllocatedFsSpace : Выделили место под файловую систему
+FilledFsMetadata : Записали метаданные файловой системы
+ChosenFileAllocationMethod : Выбрали метод распределения файлов
+FilledFileAllocationMethodMetadata : Записали метаданные метода распределения файлов
+FileSystemReady : Файловая система готова для использования
+
+
+[*] --> AllocatedFsSpace
+AllocatedFsSpace --> FilledFsMetadata
+FilledFsMetadata --> ChosenFileAllocationMethod
+ChosenFileAllocationMethod --> FilledFileAllocationMethodMetadata
+FilledFileAllocationMethodMetadata --> FileSystemReady
+FileSystemReady --> [*]
+
+@enduml

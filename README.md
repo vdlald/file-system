@@ -40,6 +40,8 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [x] T-4. Store metadata in FS
 [x] T-5. Reading blocks
 [x] T-6. Write data in block
+[x] T-9. Refactor file system creation
+[ ] T-8. Index of free blocks
 [ ] T-7. Write data in blocks
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
@@ -47,6 +49,7 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [ ] P-1. Two files with same name problem
 [ ] P-2. FS initial max size is only 2GB
 [ ] P-3. The initial metadata size should not be in the initial metadata size
+[ ] P-4. Allocated space offset validation
 
 
 ## T-1. Creating FS file
