@@ -25,7 +25,6 @@ public class CreateFileSystemOperationTest extends AbstractFileSystemTest {
                 .whereToStore(tempDirectory)
                 .fileSystemName(fsName)
                 .initialSizeInBytes(size)
-                .fileAllocationMethod(CreateFileSystemRequest.FileAllocationMethodType.INDEX_ALLOCATION)
                 .build();
 
         try (FileSystem ignored = createFileSystemOperation.createFileSystem(request)) {

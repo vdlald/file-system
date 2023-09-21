@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.FileSystem;
-import me.vladislav.fs.IndexedAllocationMethod;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,6 @@ import static java.nio.file.StandardOpenOption.WRITE;
 public class CreateFileSystemOperation {
 
     private final OpenFileSystemOperation openFileSystemOperation;
-    private final InitIndexedAllocationMethod initIndexedAllocationMethod;
 
     @Nonnull
     public FileSystem createFileSystem(@Nonnull CreateFileSystemRequest request) throws IOException {
@@ -52,17 +50,6 @@ public class CreateFileSystemOperation {
         ByteBuffer createdAtBytes = ByteBuffer.wrap(createdAt.getBytes(UTF_8));
         channel.write(createdAtBytes);
 
-        switch (request.getFileAllocationMethod()) {
-            case INDEX_ALLOCATION -> {
-                ByteBuffer fileAllocationMethodCode = ByteBuffer.wrap(IndexedAllocationMethod.CODE.getBytes(UTF_8));
-                channel.write(fileAllocationMethodCode);
-
-                initIndexedAllocationMethod.initInAllocatedSpace(allocatedSpaceForUsage);
-            }
-            default -> {
-                throw new RuntimeException("");
-            }
-        }
 
         channel.close();
 

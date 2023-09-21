@@ -41,8 +41,10 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [x] T-5. Reading blocks
 [x] T-6. Write data in block
 [x] T-9. Refactor file system creation
-[ ] T-8. Index of free blocks
-[ ] T-7. Write data in blocks
+[-] T-8. Index of free blocks
+[-] T-7. Write data in blocks
+[ ] T-10. Writing data - Write file descriptor in files table
+[ ] T-11. Writing data - Write file data in available place
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
 
@@ -54,7 +56,8 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 
 ## T-1. Creating FS file
 
-I will use Indexed Allocation as File Allocation Method
+~~I will use Indexed Allocation as File Allocation Method~~
+I decided to use a simpler way to allocate memory
 
 
 # Researching

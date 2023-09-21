@@ -2,6 +2,7 @@ package me.vladislav.fs;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Builder;
+import lombok.With;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import static me.vladislav.fs.FileSystem.Metadata.CREATED_AT_SIZE;
 @Builder(toBuilder = true)
 public class AllocatedSpace implements Closeable {
 
+    @With
     private final long startOffset;
 
     private final SeekableByteChannel data;

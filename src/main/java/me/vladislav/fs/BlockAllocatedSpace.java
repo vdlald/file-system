@@ -1,18 +1,19 @@
 package me.vladislav.fs;
 
-import com.google.common.annotations.VisibleForTesting;
-import lombok.Builder;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-@Builder(toBuilder = true)
-public class IndexedAllocationMethod {
+public class BlockAllocatedSpace {
 
-    public static final String CODE = "IAM";
-
+    private final long blocksAmount;
     private final BlockSize blockSize;
     private final AllocatedSpace allocatedSpace;
+
+    public BlockAllocatedSpace(BlockSize blockSize, AllocatedSpace allocatedSpace) throws IOException {
+        this.blockSize = blockSize;
+        this.allocatedSpace = allocatedSpace;
+        blocksAmount = allocatedSpace.size() / blockSize.getBlockSizeInBytes();
+    }
 
     public ByteBuffer readBlock(int blockIndex) throws IOException {
         int blockStart = blockStart(blockIndex);
@@ -25,8 +26,7 @@ public class IndexedAllocationMethod {
         return buffer;
     }
 
-    @VisibleForTesting
-    protected void writeBlock(int blockIndex, ByteBuffer data) throws IOException {
+    public void writeBlock(int blockIndex, ByteBuffer data) throws IOException {
         if (data.array().length > blockSize.getBlockSizeInBytes()) {
             throw new RuntimeException();
         }
