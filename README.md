@@ -38,6 +38,7 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [x] T-0. Base project template
 [x] T-1. Creating FS file
 [x] T-4. Store metadata in FS
+[x] T-5. Reading blocks
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
 
@@ -55,4 +56,4 @@ I will use Indexed Allocation as File Allocation Method
 
 1. https://www.geeksforgeeks.org/file-systems-in-operating-system/
 2. https://github.com/seclerp/FileFS/blob/master/docs/Architecture-overview.md
-
+3. https://www.geeksforgeeks.org/difference-between-internal-and-external-fragmentation/

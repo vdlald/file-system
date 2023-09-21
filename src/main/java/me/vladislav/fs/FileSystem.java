@@ -1,5 +1,6 @@
 package me.vladislav.fs;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -36,6 +37,36 @@ public class FileSystem implements Closeable {
 
         content.position(position);
         return metadata;
+    }
+
+    public void setStartPosition() throws IOException {
+        content.position(METADATA_BYTES_SIZE);
+    }
+
+    public long getCurrentPosition() throws IOException {
+        return content.position() - METADATA_BYTES_SIZE;
+    }
+
+    public void movePosition(long amountOfBytesToMove) throws IOException {
+        long position = content.position();
+        content.position(position + amountOfBytesToMove);
+    }
+
+    public void read(ByteBuffer dst) throws IOException {
+        content.read(dst);
+    }
+
+    public long getAllocatedSize() throws IOException {
+        return content.size();
+    }
+
+    public long getAvailableToUseSize() throws IOException {
+        return getAllocatedSize() - METADATA_BYTES_SIZE;
+    }
+
+    @VisibleForTesting
+    SeekableByteChannel getContent() {
+        return content;
     }
 
     @Override
