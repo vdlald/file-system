@@ -52,8 +52,16 @@ public class FileSystem implements Closeable {
         content.position(position + amountOfBytesToMove);
     }
 
+    public void setPosition(long position) throws IOException {
+        content.position(METADATA_BYTES_SIZE + position);
+    }
+
     public void read(ByteBuffer dst) throws IOException {
         content.read(dst);
+    }
+
+    public void write(ByteBuffer src) throws IOException {
+        content.write(src);
     }
 
     public long getAllocatedSize() throws IOException {

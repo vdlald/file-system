@@ -39,6 +39,8 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [x] T-1. Creating FS file
 [x] T-4. Store metadata in FS
 [x] T-5. Reading blocks
+[x] T-6. Write data in block
+[ ] T-7. Write data in blocks
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
 
