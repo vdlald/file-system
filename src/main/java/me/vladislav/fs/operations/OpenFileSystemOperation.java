@@ -2,7 +2,10 @@ package me.vladislav.fs.operations;
 
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
+import me.vladislav.fs.BlockAllocatedSpace;
+import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.FileSystem;
+import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -47,6 +50,9 @@ public class OpenFileSystemOperation {
         return FileSystem.builder()
                 .metadata(metadata)
                 .allocatedSpace(allocatedFilesSpace)
+                .fileSystemOperations(MyFileSystemOperations.builder()
+                        .allocatedSpace(new BlockAllocatedSpace(BlockSize.KB_4, allocatedFilesSpace))
+                        .build())
                 .build();
     }
 }

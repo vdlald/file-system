@@ -43,6 +43,7 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [x] T-9. Refactor file system creation
 [-] T-8. Index of free blocks
 [-] T-7. Write data in blocks
+[x] T-12. Writing data - Serializing File descriptors
 [ ] T-10. Writing data - Write file descriptor in files table
 [ ] T-11. Writing data - Write file data in available place
 [ ] T-2. Simple creating file in FS

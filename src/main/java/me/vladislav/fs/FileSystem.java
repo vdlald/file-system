@@ -3,6 +3,7 @@ package me.vladislav.fs;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Builder;
 import lombok.Getter;
+import me.vladislav.fs.operations.FileSystemOperations;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,6 +17,12 @@ public class FileSystem implements Closeable {
 
     @Getter(onMethod = @__(@VisibleForTesting))
     private final AllocatedSpace allocatedSpace;
+
+    private final FileSystemOperations fileSystemOperations;
+
+    public AllocatedSpace getUsableAllocatedSpace() {
+        return allocatedSpace.withStartOffset(Metadata.TOTAL_SIZE);
+    }
 
     @Override
     public void close() throws IOException {
