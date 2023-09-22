@@ -2,21 +2,19 @@
 
 Implement a file system (FS) based on a single file (all data must be stored within a single file):
 
-
 # Requirements
 
-[ ] There should be support for at least:
-    [ ] creating
-    [ ] reading
-    [ ] deleting
-    [ ] updating files
+There should be support for at least:
+[ ] creating
+[ ] reading
+[ ] deleting
+[ ] updating files
 
 [ ] There should be a documented API for working with the file system
 [ ] The code must be close to production quality, including tests.
 
 [x] For implementation, please use Java
 [x] Preferably, please do not use any third-party libraries for the implementation of file storage itself.
-
 
 # Questions
 
@@ -32,7 +30,6 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 
 [ ] Q-6. Fast write or fast read?
 
-
 # Tasks
 
 [x] T-0. Base project template
@@ -44,7 +41,8 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [-] T-8. Index of free blocks
 [-] T-7. Write data in blocks
 [x] T-12. Writing data - Serializing File descriptors
-[ ] T-10. Writing data - Write file descriptor in files table
+[x] T-10. Writing data - Write file descriptor in descriptors block
+[ ] T-13. Refactor whole project
 [ ] T-11. Writing data - Write file data in available place
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
@@ -54,15 +52,19 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 [ ] P-3. The initial metadata size should not be in the initial metadata size
 [ ] P-4. Allocated space offset validation
 
-
-## T-1. Creating FS file
+## T-0. Base project template
 
 ~~I will use Indexed Allocation as File Allocation Method~~
 I decided to use a simpler way to allocate memory
-
 
 # Researching
 
 1. https://www.geeksforgeeks.org/file-systems-in-operating-system/
 2. https://github.com/seclerp/FileFS/blob/master/docs/Architecture-overview.md
 3. https://www.geeksforgeeks.org/difference-between-internal-and-external-fragmentation/
+
+# Notes
+
+22.09.2023 09:04
+From this point on, I think I understand what the structure looks like. I need to refactor the code so that it will be
+easier to write further on

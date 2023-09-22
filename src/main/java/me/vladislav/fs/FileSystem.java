@@ -18,6 +18,7 @@ public class FileSystem implements Closeable {
     @Getter(onMethod = @__(@VisibleForTesting))
     private final AllocatedSpace allocatedSpace;
 
+    @Getter
     private final FileSystemOperations fileSystemOperations;
 
     public AllocatedSpace getUsableAllocatedSpace() {
