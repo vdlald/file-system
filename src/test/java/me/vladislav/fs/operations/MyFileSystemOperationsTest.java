@@ -2,10 +2,10 @@ package me.vladislav.fs.operations;
 
 import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.BlockAllocatedSpace;
+import me.vladislav.fs.blocks.FileContentIndexBlock;
+import me.vladislav.fs.blocks.FileDescriptor;
+import me.vladislav.fs.blocks.FileDescriptorsBlock;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
-import me.vladislav.fs.operations.my.MyFileSystemOperations.FileContentIndexBlock;
-import me.vladislav.fs.operations.my.MyFileSystemOperations.FileDescriptor;
-import me.vladislav.fs.operations.my.MyFileSystemOperations.FileDescriptorsBlock;
 import me.vladislav.fs.requests.CreateFileRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,7 @@
 package me.vladislav.fs;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Getter;
 import me.vladislav.fs.operations.FileSystemOperations;
@@ -9,18 +10,36 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 
-@Builder(toBuilder = true)
+/**
+ * Represents an open file system
+ */
+@Builder
 public class FileSystem implements Closeable {
 
+    /**
+     * Metadata of the file system
+     */
     @Getter
+    @Nonnull
     private final Metadata metadata;
 
+    /**
+     * All available space in the file system
+     */
+    @Nonnull
     @Getter(onMethod = @__(@VisibleForTesting))
     private final AllocatedSpace allocatedSpace;
 
+    /**
+     * Operations available on this file system
+     */
     @Getter
+    @Nonnull
     private final FileSystemOperations fileSystemOperations;
 
+    /**
+     * Get the available space, which does not include file system metadata
+     */
     public AllocatedSpace getUsableAllocatedSpace() {
         return allocatedSpace.withStartOffset(Metadata.TOTAL_SIZE);
     }
@@ -37,7 +56,10 @@ public class FileSystem implements Closeable {
         public static final int CREATED_AT_SIZE = 25;
         public static final int TOTAL_SIZE = CREATED_AT_SIZE + FAM_SIZE;
 
+        @Nonnull
         private final ZonedDateTime createdAt;
+
+        @Nonnull
         private final String fileAllocationMethod;
     }
 }

@@ -42,7 +42,7 @@ There should be support for at least:
 [-] T-7. Write data in blocks
 [x] T-12. Writing data - Serializing File descriptors
 [x] T-10. Writing data - Write file descriptor in descriptors block
-[ ] T-13. Refactor whole project
+[x] T-13. Refactor whole project
 [ ] T-11. Writing data - Write file data in available place
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS

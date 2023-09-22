@@ -1,10 +1,12 @@
 package me.vladislav.fs.operations;
 
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.FileSystem;
+import me.vladislav.fs.FileSystem.Metadata;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import org.springframework.stereotype.Component;
 
@@ -16,20 +18,22 @@ import java.time.format.DateTimeFormatter;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static me.vladislav.fs.FileSystem.Metadata.*;
+import static me.vladislav.fs.FileSystem.Metadata.CREATED_AT_SIZE;
+import static me.vladislav.fs.FileSystem.Metadata.FAM_SIZE;
 
 @Slf4j
 @Component
 public class OpenFileSystemOperation {
 
-    public FileSystem open(Path savePlace) throws IOException {
+    @Nonnull
+    public FileSystem open(@Nonnull Path savePlace) throws IOException {
         log.info("opening fs");
         AllocatedSpace allocatedFsSpace = AllocatedSpace.builder()
                 .data(Files.newByteChannel(savePlace, READ))
                 .build();
         AllocatedSpace allocatedFilesSpace = AllocatedSpace.builder()
                 .data(Files.newByteChannel(savePlace, READ, WRITE))
-                .startOffset(TOTAL_SIZE)
+                .startOffset(Metadata.TOTAL_SIZE)
                 .build();
 
         log.info("loading metadata");
@@ -42,7 +46,7 @@ public class OpenFileSystemOperation {
 
         allocatedFsSpace.close();
 
-        FileSystem.Metadata metadata = FileSystem.Metadata.builder()
+        Metadata metadata = Metadata.builder()
                 .createdAt(createdAt)
                 .fileAllocationMethod(fileAllocationMethod)
                 .build();

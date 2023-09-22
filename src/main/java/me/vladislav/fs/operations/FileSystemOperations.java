@@ -1,5 +1,6 @@
 package me.vladislav.fs.operations;
 
+import jakarta.annotation.Nonnull;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 
@@ -8,12 +9,13 @@ import java.nio.ByteBuffer;
 
 public interface FileSystemOperations {
 
-    void createFile(CreateFileRequest createFileRequest) throws IOException;
+    void createFile(@Nonnull CreateFileRequest createFileRequest) throws IOException;
 
-    ByteBuffer readFile(String fileName);
+    @Nonnull
+    ByteBuffer readFile(@Nonnull String fileName);
 
-    void updateFile(UpdateFileRequest updateFileRequest);
+    void updateFile(@Nonnull UpdateFileRequest updateFileRequest);
 
     // todo: Q-5 ?
-    void deleteFile(String fileName);
+    void deleteFile(@Nonnull String fileName);
 }

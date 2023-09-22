@@ -1,4 +1,4 @@
-package me.vladislav.fs;
+package me.vladislav.fs.util;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
