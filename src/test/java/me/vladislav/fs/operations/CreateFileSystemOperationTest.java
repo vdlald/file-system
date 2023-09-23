@@ -36,10 +36,8 @@ public class CreateFileSystemOperationTest extends AbstractFileSystemTest {
 
     @Test
     @DisplayName("Файловая система / При создании ФС должна быть сохранена метадата")
-    void testCreateFileSystemFileWithMetadata() throws Exception {
-        testWithFileSystem(fileSystem -> {
-            FileSystem.Metadata metadata = fileSystem.getMetadata();
-            assertNotNull(metadata.getCreatedAt());
-        });
+    void testCreateFileSystemFileWithMetadata() {
+        FileSystem.Metadata metadata = fileSystem.getMetadata();
+        assertNotNull(metadata.getCreatedAt());
     }
 }

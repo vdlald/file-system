@@ -32,6 +32,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation("com.google.guava:guava:32.1.2-jre")
+    testCompileOnly("org.projectlombok:lombok")
 }
 
 tasks.withType<Test> {

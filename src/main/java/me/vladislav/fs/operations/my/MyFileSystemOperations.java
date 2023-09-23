@@ -7,6 +7,7 @@ import lombok.Getter;
 import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
+import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.operations.FileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
@@ -22,6 +23,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
     @Nonnull
     @Getter(onMethod = @__(@VisibleForTesting))
     private final BlockAllocatedSpace allocatedSpace;
+    private final FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
 
     @Override
     public void createFile(@Nonnull CreateFileRequest createFileRequest) throws IOException {
@@ -34,7 +36,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
                 .firstBlockIndex(-1)
                 .build());
 
-        allocatedSpace.writeBlock(blockIndex, descriptorsBlock.toByteBuffer());
+        allocatedSpace.writeBlock(blockIndex, fileDescriptorsBlockBytesSerializer.toByteBuffer(descriptorsBlock));
     }
 
     @Nonnull
@@ -61,7 +63,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
     @Nonnull
     private Pair<FileDescriptorsBlock, Integer> getAvailableFileDescriptorsBlock(int blockIndex) throws IOException {
         ByteBuffer byteBuffer = allocatedSpace.readBlock(blockIndex);
-        FileDescriptorsBlock block = FileDescriptorsBlock.from(byteBuffer);
+        FileDescriptorsBlock block = fileDescriptorsBlockBytesSerializer.from(byteBuffer);
         if (block.isFull()) {
             return getAvailableFileDescriptorsBlock(block.getNextFileDescriptorBlock());
         }

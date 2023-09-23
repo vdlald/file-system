@@ -3,43 +3,54 @@ package me.vladislav.fs;
 import me.vladislav.fs.operations.CreateFileSystemOperation;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
+@SpringBootTest
 public class AbstractFileSystemTest {
 
     public static final int MB_8 = 1048576;
 
-    protected final OpenFileSystemOperation openFileSystemOperation = new OpenFileSystemOperation();
-    protected final CreateFileSystemOperation createFileSystemOperation = new CreateFileSystemOperation(
-            openFileSystemOperation);
+    @Autowired
+    protected OpenFileSystemOperation openFileSystemOperation;
 
-    protected Path tempDirectory;
+    @Autowired
+    protected CreateFileSystemOperation createFileSystemOperation;
 
-    @BeforeEach
-    void setUp() throws IOException {
+    protected FileSystem fileSystem;
+    protected static Path tempDirectory;
+
+    @BeforeAll
+    static void setUpData() throws IOException {
         tempDirectory = Files.createTempDirectory("test-fs-jb_");
     }
 
-    protected void testWithFileSystem(FileSystemTestFunction testFunction) throws Exception {
-        CreateFileSystemRequest request = CreateFileSystemRequest.builder()
+    @BeforeEach
+    void setUp() throws IOException {
+        CreateFileSystemRequest request = getCreateFileSystemRequest();
+        fileSystem = createFileSystemOperation.createFileSystem(request);
+    }
+
+    @AfterEach
+    void cleanUp() throws IOException {
+        fileSystem.close();
+    }
+
+    @Nonnull
+    protected CreateFileSystemRequest getCreateFileSystemRequest() {
+        return CreateFileSystemRequest.builder()
                 .whereToStore(tempDirectory)
                 .fileSystemName(UUID.randomUUID().toString())
                 .initialSizeInBytes(MB_8)
                 .build();
-
-        try (FileSystem fileSystem = createFileSystemOperation.createFileSystem(request)) {
-            testFunction.test(fileSystem);
-        }
-    }
-
-    @FunctionalInterface
-    protected interface FileSystemTestFunction {
-
-        void test(FileSystem fileSystem) throws Exception;
     }
 }
