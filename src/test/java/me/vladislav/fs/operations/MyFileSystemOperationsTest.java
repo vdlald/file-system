@@ -1,9 +1,13 @@
 package me.vladislav.fs.operations;
 
 import me.vladislav.fs.AbstractFileSystemTest;
+import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.BlockAllocatedSpace;
+import me.vladislav.fs.BlockSize;
+import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
+import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
@@ -13,10 +17,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
+
+    @Autowired
+    private FileContentIndexBlockBytesSerializer indexBlockBytesSerializer;
 
     @Autowired
     private FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
@@ -59,10 +67,147 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         assertNotNull(descriptor);
         assertNotEquals(0, descriptor.getFileBlockIndex());
 
-        ByteBuffer contentRaw = allocatedSpace.readBlock(descriptor.getFileBlockIndex());
+        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
+                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+
+        ByteBuffer contentRaw = allocatedSpace.readBlocks(indexBlock.getBlockPointers());
         String content = ByteBufferUtils.parseString(contentRaw);
 
         assertEquals(expected, content);
+    }
+
+    @Test
+    @DisplayName("File creation / File content must be written / Big file")
+    void testCreateBigFileContent() throws Exception {
+        CreateFileRequest request = createFileRequest(readCvFile());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
+        ByteBuffer firstBlock = allocatedSpace.readBlock(0);
+
+        FileDescriptorsBlock descriptors = fileDescriptorsBlockBytesSerializer.from(firstBlock);
+
+        FileDescriptor descriptor = descriptors.getDescriptor(0);
+
+        assertNotNull(descriptor);
+        assertNotEquals(0, descriptor.getFileBlockIndex());
+
+        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
+                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+
+        SeekableByteChannel file = readCvFile();
+
+        BlockAllocatedSpace blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(file)
+                .build());
+
+        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
+            assertEquals(
+                    blockAllocatedSpace.readBlock(i),
+                    allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i))
+            );
+        }
+        file.close();
+    }
+
+    @Test
+    @DisplayName("File creation / File content must be written / Big big file")
+    void testCreateBigBigFileContent() throws Exception {
+        CreateFileRequest request = createFileRequest(readJbFile());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
+        ByteBuffer firstBlock = allocatedSpace.readBlock(0);
+
+        FileDescriptorsBlock descriptors = fileDescriptorsBlockBytesSerializer.from(firstBlock);
+
+        FileDescriptor descriptor = descriptors.getDescriptor(0);
+
+        assertNotNull(descriptor);
+        assertNotEquals(0, descriptor.getFileBlockIndex());
+
+        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
+                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+
+        SeekableByteChannel file = readJbFile();
+
+        BlockAllocatedSpace blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(file)
+                .build());
+
+        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
+            ByteBuffer expected = blockAllocatedSpace.readBlock(i);
+            ByteBuffer actual = allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i));
+            assertEquals(expected, actual);
+        }
+        file.close();
+    }
+
+    @Test
+    @DisplayName("File creation / Must save both files")
+    void testCreateTwoFilesContent() throws Exception {
+        CreateFileRequest request1 = createFileRequest(readJbFile());
+        fileSystem.getFileSystemOperations().createFile(request1);
+
+        CreateFileRequest request2 = createFileRequest(readCvFile());
+        fileSystem.getFileSystemOperations().createFile(request2);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
+        ByteBuffer firstBlock = allocatedSpace.readBlock(0);
+
+        FileDescriptorsBlock descriptors = fileDescriptorsBlockBytesSerializer.from(firstBlock);
+
+        // check first file
+        FileDescriptor descriptor = descriptors.getDescriptor(0);
+
+        assertNotNull(descriptor);
+        assertNotEquals(0, descriptor.getFileBlockIndex());
+
+        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
+                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+
+        SeekableByteChannel file = readJbFile();
+
+        BlockAllocatedSpace blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(file)
+                .build());
+
+        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
+            assertEquals(
+                    blockAllocatedSpace.readBlock(i),
+                    allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i))
+            );
+        }
+        file.close();
+
+
+        // check second file
+        descriptor = descriptors.getDescriptor(1);
+
+        assertNotNull(descriptor);
+        assertNotEquals(0, descriptor.getFileBlockIndex());
+
+        indexBlock = indexBlockBytesSerializer.from(
+                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+
+        file = readCvFile();
+
+        blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(file)
+                .build());
+
+        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
+            assertEquals(
+                    blockAllocatedSpace.readBlock(i),
+                    allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i))
+            );
+        }
+        file.close();
     }
 
     @Test
@@ -75,5 +220,4 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         assertFalse(request.getContent().isOpen());
     }
-
 }

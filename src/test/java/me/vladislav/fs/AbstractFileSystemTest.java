@@ -5,6 +5,8 @@ import me.vladislav.fs.operations.OpenFileSystemOperation;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
 import me.vladislav.fs.util.ByteBufferUtils;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -73,6 +76,13 @@ public class AbstractFileSystemTest {
                 .build();
     }
 
+    protected CreateFileRequest createFileRequest(SeekableByteChannel file) throws IOException {
+        return CreateFileRequest.builder()
+                .filename(UUID.randomUUID().toString())
+                .content(file)
+                .build();
+    }
+
     protected SeekableByteChannel createTempFile(String content) throws IOException {
         Path tempFile = Files.createTempFile("temp", "suff");
         SeekableByteChannel seekableByteChannel = Files.newByteChannel(tempFile, READ, WRITE);
@@ -86,5 +96,18 @@ public class AbstractFileSystemTest {
 
     protected void assertIsNotEmpty(ByteBuffer buffer) {
         assertFalse(ByteBufferUtils.isEmpty(buffer));
+    }
+
+    protected SeekableByteChannel readCvFile() throws IOException {
+        return readFile("/files/vladislav_golubinov_cv_for_jb.pdf");
+    }
+
+    protected SeekableByteChannel readJbFile() throws IOException {
+        return readFile("/files/jb.png");
+    }
+
+    protected SeekableByteChannel readFile(String name) throws IOException {
+        InputStream input = AbstractFileSystemTest.class.getResourceAsStream(name);
+        return new SeekableInMemoryByteChannel(IOUtils.toByteArray(input));
     }
 }

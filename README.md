@@ -51,6 +51,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-13. Refactor whole project
 [x] T-14. Find the best block for filling a data
 [x] T-11. Writing data - Write file data in available place
+[x] T-15. Writing data - Write big file
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
 
@@ -58,6 +59,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [ ] P-2. FS initial max size is only 2GB
 [ ] P-3. The initial metadata size should not be in the initial metadata size
 [ ] P-4. Allocated space offset validation
+[ ] P-5. readBlocks can not allocate more than Integer.MAX bytes
 
 ## T-0. Base project template
 

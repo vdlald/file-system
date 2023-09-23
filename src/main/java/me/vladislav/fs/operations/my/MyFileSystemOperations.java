@@ -44,6 +44,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
         allocatedSpace.markBlockAsAllocated(0);
         int fileIndexBlock = allocatedSpace.getFirstFreeBlockIndex();
+        allocatedSpace.markBlockAsAllocated(fileIndexBlock);
         descriptorsBlock.addDescriptor(FileDescriptor.builder()
                 .filename(createFileRequest.getFilename())
                 .fileBlockIndex(fileIndexBlock)
@@ -53,9 +54,6 @@ public class MyFileSystemOperations implements FileSystemOperations {
         FileContentIndexBlock firstIndexBlock = new FileContentIndexBlock();
         AtomicReference<FileContentIndexBlock> currentFileContentIndexBlock = new AtomicReference<>(firstIndexBlock);
         List<FileContentIndexBlock> nextIndexBlocks = new ArrayList<>();
-
-        ByteBuffer firstIndexBytes = indexBlockSerializer.toByteBuffer(firstIndexBlock);
-        allocatedSpace.writeBlock(fileIndexBlock, firstIndexBytes);
 
         BlockAllocatedSpace content = new BlockAllocatedSpace(KB_4, AllocatedSpace.builder()
                 .data(createFileRequest.getContent())
@@ -69,7 +67,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
                     ByteBuffer data = content.readBlock();
                     allocatedSpace.writeBlock(freeBlockIndex, data);
 
-                    if (!currentFileContentIndexBlock.get().addBlockPointer(blockIndex)) {
+                    if (!currentFileContentIndexBlock.get().addBlockPointer(freeBlockIndex)) {
                         int nextFileBlockIndex = allocatedSpace.getFirstFreeBlockIndex();
                         allocatedSpace.markBlockAsAllocated(nextFileBlockIndex);
                         currentFileContentIndexBlock.get().setNextIndexBlock(nextFileBlockIndex);
@@ -81,6 +79,9 @@ public class MyFileSystemOperations implements FileSystemOperations {
                     }
                     return null;
                 }));
+
+        ByteBuffer firstIndexBytes = indexBlockSerializer.toByteBuffer(firstIndexBlock);
+        allocatedSpace.writeBlock(fileIndexBlock, firstIndexBytes);
 
         int nextFileIndexBlockIndex = currentFileContentIndexBlock.get().getNextIndexBlock();
         for (FileContentIndexBlock nextIndexBlock : nextIndexBlocks) {

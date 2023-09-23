@@ -1,6 +1,8 @@
 package me.vladislav.fs.util;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 
 public class ByteBufferUtils {
@@ -40,5 +42,11 @@ public class ByteBufferUtils {
         byte[] b = new byte[buffer.remaining()];
         buffer.get(b);
         return new String(b, StandardCharsets.UTF_8);
+    }
+
+    public static ByteBuffer readWholeChannel(SeekableByteChannel seekableByteChannel) throws IOException {
+        ByteBuffer allocate = ByteBuffer.allocate((int) seekableByteChannel.size());
+        seekableByteChannel.read(allocate);
+        return allocate.rewind();
     }
 }
