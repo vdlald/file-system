@@ -15,6 +15,6 @@ public class FileContentBytesSerializer implements BytesSerializer<FileContentBl
 
     @Override
     public ByteBuffer toByteBuffer(FileContentBlock object) {
-        return object.getData().duplicate();
+        return object.getData().rewind().duplicate();
     }
 }

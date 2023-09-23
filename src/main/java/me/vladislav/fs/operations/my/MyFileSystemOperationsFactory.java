@@ -2,8 +2,9 @@ package me.vladislav.fs.operations.my;
 
 import lombok.RequiredArgsConstructor;
 import me.vladislav.fs.AllocatedSpace;
-import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.BlockSize;
+import me.vladislav.fs.IndexedBlockAllocatedSpace;
+import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -16,12 +17,14 @@ import java.io.IOException;
 public class MyFileSystemOperationsFactory {
 
     private final ObjectProvider<MyFileSystemOperations> objectProvider;
+    private final FileContentIndexBlockBytesSerializer indexBlockBytesSerializer;
     private final FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
 
     @Nonnull
     public MyFileSystemOperations create(@Nonnull AllocatedSpace allocatedSpace) throws IOException {
         return objectProvider.getObject(
-                new BlockAllocatedSpace(BlockSize.KB_4, allocatedSpace),
+                new IndexedBlockAllocatedSpace(BlockSize.KB_4, allocatedSpace),
+                indexBlockBytesSerializer,
                 fileDescriptorsBlockBytesSerializer
         );
     }

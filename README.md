@@ -5,7 +5,7 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 # Requirements
 
 There should be support for at least:
-[ ] creating
+[x] creating
 [ ] reading
 [ ] deleting
 [ ] updating files
@@ -18,17 +18,23 @@ There should be support for at least:
 
 # Questions
 
-[ ] Q-1. Will it be enough to provide just a Java interface with Javadoc or do I need to provide an OpenAPI contract?
+[x] Q-1. Will it be enough to provide just a Java interface with Javadoc or do I need to provide an OpenAPI contract?
+It would be great to see a console app, but Java interface with Javadoc will be sufficient
 
-[ ] Q-2. Do I need to optimize the space used when deleting a file?
+[x] Q-2. Do I need to optimize the space used when deleting a file?
+It’s up to you if you want to optimize the used space
 
-[ ] Q-3. Should the file system be created with a specific size or unlimited?
+[x] Q-3. Should the file system be created with a specific size or unlimited?
+File system should not have a hard size limit but let’s assume that users won’t stress it beyond some reasonable limits
 
-[ ] Q-4. The result should be a mini library? Or assume it's part of the application and I can use spring and so on?
+[x] Q-4. The result should be a mini library? Or assume it's part of the application and I can use spring and so on?
+It would be great to see a console app, but Java interface with Javadoc will be sufficient
 
-[ ] Q-5. Should the file system be hierarchical?
+[x] Q-5. Should the file system be hierarchical?
+Up to me
 
-[ ] Q-6. Fast write or fast read?
+[x] Q-6. Fast write or fast read?
+As for the fast write/fast read - let’s assume that we want balance between reads and writes
 
 # Tasks
 
@@ -43,7 +49,8 @@ There should be support for at least:
 [x] T-12. Writing data - Serializing File descriptors
 [x] T-10. Writing data - Write file descriptor in descriptors block
 [x] T-13. Refactor whole project
-[ ] T-11. Writing data - Write file data in available place
+[x] T-14. Find the best block for filling a data
+[x] T-11. Writing data - Write file data in available place
 [ ] T-2. Simple creating file in FS
 [ ] T-3. Reading file in FS
 

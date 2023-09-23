@@ -38,6 +38,7 @@ public class FileContentIndexBlockBytesSerializer implements BytesSerializer<Fil
                 .put(ByteBuffer.allocate(FileContentIndexBlock.NEXT_INDEX_BLOCK_SIZE)
                         .putInt(object.getNextIndexBlock())
                         .rewind())
-                .put(blockPointersBuffer.rewind());
+                .put(blockPointersBuffer.rewind())
+                .rewind();
     }
 }

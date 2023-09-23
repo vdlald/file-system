@@ -1,6 +1,7 @@
 package me.vladislav.fs.operations;
 
-import me.vladislav.fs.BlockAllocatedSpace;
+import me.vladislav.fs.IndexedBlockAllocatedSpace;
+import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import org.springframework.context.annotation.Bean;
@@ -14,12 +15,14 @@ public class OperationsConfig {
     @Scope("prototype")
     @SuppressWarnings("all")
     public MyFileSystemOperations myFileSystemOperations(
-            BlockAllocatedSpace allocatedSpace,
+            IndexedBlockAllocatedSpace allocatedSpace,
+            FileContentIndexBlockBytesSerializer indexBlockBytesSerializer,
             FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer
     ) {
         return MyFileSystemOperations.builder()
                 .allocatedSpace(allocatedSpace)
-                .fileDescriptorsBlockBytesSerializer(fileDescriptorsBlockBytesSerializer)
+                .indexBlockSerializer(indexBlockBytesSerializer)
+                .descriptorsBlockSerializer(fileDescriptorsBlockBytesSerializer)
                 .build();
     }
 }

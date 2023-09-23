@@ -32,7 +32,7 @@ public class BytesSerializerTest extends AbstractFileSystemTest {
 
         FileDescriptor expected = FileDescriptor.builder()
                 .filename(filename)
-                .firstBlockIndex(4)
+                .fileBlockIndex(4)
                 .build();
 
         ByteBuffer descriptorRaw = fileDescriptorBytesSerializer.toByteBuffer(expected);
@@ -49,11 +49,11 @@ public class BytesSerializerTest extends AbstractFileSystemTest {
 
         FileDescriptor expected1 = FileDescriptor.builder()
                 .filename(UUID.randomUUID().toString())
-                .firstBlockIndex(4)
+                .fileBlockIndex(4)
                 .build();
         FileDescriptor expected2 = FileDescriptor.builder()
                 .filename(UUID.randomUUID().toString())
-                .firstBlockIndex(7)
+                .fileBlockIndex(7)
                 .build();
 
         block.addDescriptor(expected1);

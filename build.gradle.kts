@@ -29,10 +29,10 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-
-    // https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation("com.google.guava:guava:32.1.2-jre")
     testCompileOnly("org.projectlombok:lombok")
+
+    implementation("com.google.guava:guava:32.1.2-jre")
+    implementation("net.sf.trove4j:trove4j:3.0.3")
 }
 
 tasks.withType<Test> {

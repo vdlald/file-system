@@ -13,13 +13,13 @@ public class FileDescriptorBytesSerializer implements BytesSerializer<FileDescri
 
     @Override
     public FileDescriptor from(ByteBuffer src) {
-        int firstBlockIndex = src.slice(0, FileDescriptor.FIRST_BLOCK_INDEX_SIZE).asIntBuffer().get();
+        int firstBlockIndex = src.slice(0, FileDescriptor.FILE_BLOCK_INDEX_SIZE).asIntBuffer().get();
 
-        ByteBuffer filenameBytes = src.slice(FileDescriptor.FIRST_BLOCK_INDEX_SIZE, FileDescriptor.FILENAME_SIZE);
+        ByteBuffer filenameBytes = src.slice(FileDescriptor.FILE_BLOCK_INDEX_SIZE, FileDescriptor.FILENAME_SIZE);
         String filename = ByteBufferUtils.readToString(ByteBufferUtils.sliceToFirstZero(filenameBytes));
 
         return FileDescriptor.builder()
-                .firstBlockIndex(firstBlockIndex)
+                .fileBlockIndex(firstBlockIndex)
                 .filename(filename)
                 .build();
     }
@@ -30,7 +30,7 @@ public class FileDescriptorBytesSerializer implements BytesSerializer<FileDescri
                 .put(object.getFilename().getBytes(UTF_8))
                 .rewind();
         return ByteBuffer.allocate(FileDescriptor.TOTAL_SIZE)
-                .putInt(object.getFirstBlockIndex())
+                .putInt(object.getFileBlockIndex())
                 .put(filenameBytes)
                 .rewind();
     }

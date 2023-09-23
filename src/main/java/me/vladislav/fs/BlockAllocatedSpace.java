@@ -1,6 +1,7 @@
 package me.vladislav.fs;
 
 import jakarta.annotation.Nonnull;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -13,13 +14,14 @@ public class BlockAllocatedSpace {
     /**
      * Number of available blocks
      */
-    private final long blocksAmount;
+    @Getter
+    protected int blocksAmount;
 
     /**
      * Size of one block
      */
     @Nonnull
-    private final BlockSize blockSize;
+    protected final BlockSize blockSize;
 
     @Nonnull
     private final AllocatedSpace allocatedSpace;
@@ -30,19 +32,17 @@ public class BlockAllocatedSpace {
     ) throws IOException {
         this.blockSize = blockSize;
         this.allocatedSpace = allocatedSpace;
-        blocksAmount = allocatedSpace.size() / blockSize.getBlockSizeInBytes();
+        blocksAmount = (int) (allocatedSpace.size() / blockSize.getBlockSizeInBytes());
     }
 
     @Nonnull
     public ByteBuffer readBlock(int blockIndex) throws IOException {
-        int blockStart = blockStart(blockIndex);
+        return allocatedSpace.position(blockStart(blockIndex))
+                .read(blockSize.getBlockSizeInBytes());
+    }
 
-        allocatedSpace.position(blockStart);
-
-        ByteBuffer buffer = ByteBuffer.allocate(blockSize.getBlockSizeInBytes());
-        allocatedSpace.read(buffer);
-
-        return buffer;
+    public ByteBuffer readBlock() throws IOException {
+        return allocatedSpace.read(blockSize.getBlockSizeInBytes());
     }
 
     public void writeBlock(int blockIndex, @Nonnull ByteBuffer data) throws IOException {
@@ -50,8 +50,17 @@ public class BlockAllocatedSpace {
             throw new RuntimeException();
         }
 
+        allocatedSpace.position(blockStart(blockIndex))
+                .write(data);
+    }
+
+    public BlockAllocatedSpace block(int blockIndex) throws IOException {
         allocatedSpace.position(blockStart(blockIndex));
-        allocatedSpace.write(data);
+        return this;
+    }
+
+    public long size() throws IOException {
+        return allocatedSpace.size();
     }
 
     private int blockStart(int blockIndex) {
