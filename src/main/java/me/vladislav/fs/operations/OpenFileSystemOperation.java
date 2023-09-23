@@ -1,13 +1,12 @@
 package me.vladislav.fs.operations;
 
 import jakarta.annotation.Nonnull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
-import me.vladislav.fs.BlockAllocatedSpace;
-import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.FileSystem;
 import me.vladislav.fs.FileSystem.Metadata;
-import me.vladislav.fs.operations.my.MyFileSystemOperations;
+import me.vladislav.fs.operations.my.MyFileSystemOperationsFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -23,7 +22,10 @@ import static me.vladislav.fs.FileSystem.Metadata.FAM_SIZE;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OpenFileSystemOperation {
+
+    private final MyFileSystemOperationsFactory myFileSystemOperationsFactory;
 
     @Nonnull
     public FileSystem open(@Nonnull Path savePlace) throws IOException {
@@ -54,9 +56,7 @@ public class OpenFileSystemOperation {
         return FileSystem.builder()
                 .metadata(metadata)
                 .allocatedSpace(allocatedFilesSpace)
-                .fileSystemOperations(MyFileSystemOperations.builder()
-                        .allocatedSpace(new BlockAllocatedSpace(BlockSize.KB_4, allocatedFilesSpace))
-                        .build())
+                .fileSystemOperations(myFileSystemOperationsFactory.create(allocatedFilesSpace))
                 .build();
     }
 }
