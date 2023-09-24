@@ -219,6 +219,40 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
+
+    @ParameterizedTest
+    @EnumSource(BlockSize.class)
+    @DisplayName("File read and create / Big big file")
+    void testCreateAndRead(BlockSize blockSize) throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(blockSize));
+
+        CreateFileRequest request = createFileRequest(readJbFile());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        SeekableByteChannel read = fsOperations.readFile(request.getFilename());
+
+        SeekableByteChannel file = readJbFile();
+
+        BlockAllocatedSpace expectedBlocks = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(file)
+                .build());
+
+        BlockAllocatedSpace actualBlocks = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(read)
+                .build());
+
+        for (int i = 0; i < expectedBlocks.getBlocksAmount(); i++) {
+            ByteBuffer expected = expectedBlocks.readBlock(i);
+            ByteBuffer actual = actualBlocks.readBlock(i);
+            assertEquals(expected, actual);
+        }
+        file.close();
+        fileSystem.close();
+    }
+
     @Test
     @DisplayName("File creation / File is closed after writing")
     void testCreateFileClose() throws Exception {

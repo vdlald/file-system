@@ -58,6 +58,10 @@ public class FileDescriptorsBlock {
         return descriptors.size() == DESCRIPTORS_LIST_MAX_SIZE;
     }
 
+    public boolean containsNextBlock() {
+        return nextFileDescriptorBlock > 0;
+    }
+
     public int size() {
         return descriptors.size();
     }

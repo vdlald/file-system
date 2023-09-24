@@ -54,7 +54,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-15. Writing data - Write big file
 [T-11] T-2. Simple creating file in FS
 [x] T-16. Save a block size of the FS in metadata
-[ ] T-3. Reading file in FS
+[x] T-3. Reading files in FS
 
 [ ] P-1. Two files with same name problem
 [ ] P-2. FS initial max size is only 2GB

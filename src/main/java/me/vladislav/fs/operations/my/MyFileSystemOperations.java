@@ -17,11 +17,14 @@ import me.vladislav.fs.operations.FileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 import me.vladislav.fs.util.Pair;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -98,8 +101,24 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
     @Nonnull
     @Override
-    public ByteBuffer readFile(@Nonnull String fileName) {
-        return null;
+    public SeekableByteChannel readFile(@Nonnull String filename) throws IOException {
+        SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
+        FileDescriptor fileDescriptor = getFileDescriptor(filename);
+
+        FileContentIndexBlock indexBlock;
+        int indexBlockIndex = fileDescriptor.getFileBlockIndex();
+        do {
+            ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
+            indexBlock = indexBlockSerializer.from(indexBlockBuffer);
+
+            for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
+                ByteBuffer buffer = allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i));
+                channel.write(buffer);
+            }
+            indexBlockIndex = indexBlock.getNextIndexBlock();
+        } while (indexBlock.containsNextBlock());
+        return channel.position(0);
+
     }
 
     @Override
@@ -135,5 +154,27 @@ public class MyFileSystemOperations implements FileSystemOperations {
             return getAvailableFileDescriptorsBlock(nextFileDescriptorBlock);
         }
         return Pair.of(block, blockIndex);
+    }
+
+    @Nonnull
+    private FileDescriptor getFileDescriptor(@Nonnull String filename) throws IOException {
+        FileDescriptorsBlock descriptors;
+        Optional<FileDescriptor> descriptor;
+        int nextBlock = 0;
+        do {
+            ByteBuffer byteBuffer = allocatedSpace.readBlock(nextBlock);
+            descriptors = descriptorsBlockSerializer.from(byteBuffer);
+
+            descriptor = descriptors.getDescriptors().stream()
+                    .filter(fileDescriptor -> filename.equals(fileDescriptor.getFilename()))
+                    .findFirst();
+            nextBlock = descriptors.getNextFileDescriptorBlock();
+        } while (descriptor.isEmpty() && descriptors.containsNextBlock());
+
+        if (descriptor.isEmpty()) {
+            throw new RuntimeException("not found");
+        }
+
+        return descriptor.get();
     }
 }

@@ -40,4 +40,8 @@ public class FileContentIndexBlock {
     public boolean isFull() {
         return blockPointers.size() >= MAX_BLOCK_POINTERS;
     }
+
+    public boolean containsNextBlock() {
+        return nextIndexBlock > 0;
+    }
 }

@@ -5,14 +5,14 @@ import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 
 public interface FileSystemOperations {
 
     void createFile(@Nonnull CreateFileRequest createFileRequest) throws IOException;
 
     @Nonnull
-    ByteBuffer readFile(@Nonnull String fileName);
+    SeekableByteChannel readFile(@Nonnull String fileName) throws IOException;
 
     void updateFile(@Nonnull UpdateFileRequest updateFileRequest);
 
