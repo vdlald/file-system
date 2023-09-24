@@ -52,10 +52,14 @@ public class AllocatedSpace implements Closeable {
     }
 
     @Nonnull
-    public ByteBuffer read(int amountOfBytes) throws IOException {
-        ByteBuffer allocate = ByteBuffer.allocate(amountOfBytes);
-        data.read(allocate);
-        return allocate.rewind();
+    public ByteBuffer read(int amountOfBytes) {
+        try {
+            ByteBuffer allocate = ByteBuffer.allocate(amountOfBytes);
+            data.read(allocate);
+            return allocate.rewind();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int read(@Nonnull ByteBuffer dst) throws IOException {
@@ -85,11 +89,19 @@ public class AllocatedSpace implements Closeable {
         return this;
     }
 
-    public boolean isCurrentPositionMoreOrEqualsSizeOfChannel() throws IOException {
-        return data.position() >= data.size();
+    public boolean isCurrentPositionMoreOrEqualsSizeOfChannel() {
+        try {
+            return data.position() >= data.size();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public long size() throws IOException {
-        return data.size() - startOffset;
+    public long size() {
+        try {
+            return data.size() - startOffset;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -22,6 +22,9 @@ public class FileContentIndexBlock {
     @Getter
     private int nextIndexBlock = 0;
 
+    @Getter
+    private final int maxBlockPointers = MAX_BLOCK_POINTERS;
+
     @Nonnull
     private final List<Integer> blockPointers = new ArrayList<>(MAX_BLOCK_POINTERS);
 
@@ -37,8 +40,12 @@ public class FileContentIndexBlock {
         return true;
     }
 
-    public void removeBlockPointer(int blockIndex) {
-        blockPointers.remove((Integer) blockIndex);
+    public void removeBlockPointer(Integer blockIndex) {
+        blockPointers.remove(blockIndex);
+    }
+
+    public int size() {
+        return blockPointers.size();
     }
 
     public boolean isFull() {

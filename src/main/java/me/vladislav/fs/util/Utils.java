@@ -2,6 +2,10 @@ package me.vladislav.fs.util;
 
 public class Utils {
 
+    public static <T> Supplier<T> unchecked(Supplier<T> function) {
+        return () -> avoidException(function);
+    }
+
     public static <T> T avoidException(Supplier<T> function) {
         try {
             return function.produce();

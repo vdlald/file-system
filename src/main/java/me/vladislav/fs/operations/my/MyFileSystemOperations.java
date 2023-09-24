@@ -2,8 +2,9 @@ package me.vladislav.fs.operations.my;
 
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import lombok.Builder;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.BlockSize;
@@ -11,6 +12,8 @@ import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
+import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlock;
+import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlockFactory;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.operations.FileSystemOperations;
@@ -18,92 +21,93 @@ import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 import me.vladislav.fs.util.Pair;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static me.vladislav.fs.util.Utils.avoidException;
-
-@Builder(toBuilder = true)
+@Slf4j
+@Component
+@Scope("prototype")
 public class MyFileSystemOperations implements FileSystemOperations {
 
     public static final String METHOD_NAME = "MYI";
+    private static final int FIRST_FILE_DESCRIPTORS_BLOCK_INDEX = 0;
 
     @Nonnull
     @Getter(onMethod = @__(@VisibleForTesting))
     private final IndexedBlockAllocatedSpace allocatedSpace;
     private final FileContentIndexBlockBytesSerializer indexBlockSerializer;
     private final FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer;
+    private final ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory;
+
+    @SuppressWarnings("all")
+    public MyFileSystemOperations(
+            IndexedBlockAllocatedSpace allocatedSpace,
+            FileContentIndexBlockBytesSerializer indexBlockSerializer,
+            FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer,
+            ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory
+    ) {
+        this.allocatedSpace = allocatedSpace;
+        this.indexBlockSerializer = indexBlockSerializer;
+        this.descriptorsBlockSerializer = descriptorsBlockSerializer;
+        this.chainedFileContentIndexBlockFactory = chainedFileContentIndexBlockFactory;
+    }
+
+    @PostConstruct
+    private void init() {
+        allocatedSpace.markBlockAsAllocated(FIRST_FILE_DESCRIPTORS_BLOCK_INDEX);
+    }
 
     @Override
     public void createFile(@Nonnull CreateFileRequest createFileRequest) throws IOException {
+        log.info("creating file: {}", createFileRequest.getFilename());
+
+        log.debug("find file descriptor block with free space");
         var block = getAvailableFileDescriptorsBlock();
         FileDescriptorsBlock descriptorsBlock = block.first();
         int blockIndex = block.second();
 
-        allocatedSpace.markBlockAsAllocated(0);
-        int fileIndexBlock = allocatedSpace.getFirstFreeBlockIndex();
-        allocatedSpace.markBlockAsAllocated(fileIndexBlock);
-        descriptorsBlock.addDescriptor(FileDescriptor.builder()
+        log.debug("save file descriptor in block: {}", blockIndex);
+        int fileIndexBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
+        FileDescriptor fileDescriptor = FileDescriptor.builder()
                 .filename(createFileRequest.getFilename())
                 .fileBlockIndex(fileIndexBlock)
-                .build());
-        allocatedSpace.writeBlock(blockIndex, descriptorsBlockSerializer.toByteBuffer(descriptorsBlock));
+                .build();
+        descriptorsBlock.addDescriptor(fileDescriptor);
+        ByteBuffer descriptorBytes = descriptorsBlockSerializer.toByteBuffer(descriptorsBlock);
+        allocatedSpace.writeBlock(blockIndex, descriptorBytes);
 
+        log.debug("create index block for content");
         FileContentIndexBlock firstIndexBlock = new FileContentIndexBlock();
-        AtomicReference<FileContentIndexBlock> currentFileContentIndexBlock = new AtomicReference<>(firstIndexBlock);
-        List<FileContentIndexBlock> nextIndexBlocks = new ArrayList<>();
 
         BlockSize blockSize = allocatedSpace.getBlockSize();
         BlockAllocatedSpace content = new BlockAllocatedSpace(blockSize, AllocatedSpace.builder()
                 .data(createFileRequest.getContent())
                 .build())
                 .block(0);
-        AtomicLong written = new AtomicLong();
-        allocatedSpace.getFreeBlocksIndexStream()
-                .takeWhile(value -> avoidException(() -> content.size() > written.get()))
-                .forEach(freeBlockIndex -> avoidException(() -> {
-                    written.addAndGet(blockSize.getBlockSizeInBytes());
-                    ByteBuffer data = content.readBlock();
-                    allocatedSpace.writeBlock(freeBlockIndex, data);
 
-                    if (!currentFileContentIndexBlock.get().addBlockPointer(freeBlockIndex)) {
-                        int nextFileBlockIndex = allocatedSpace.getFirstFreeBlockIndex();
-                        allocatedSpace.markBlockAsAllocated(nextFileBlockIndex);
-                        currentFileContentIndexBlock.get().setNextIndexBlock(nextFileBlockIndex);
+        ChainedFileContentIndexBlock chainIndex = chainedFileContentIndexBlockFactory.create(
+                fileIndexBlock, firstIndexBlock, allocatedSpace);
 
-                        FileContentIndexBlock newIndexBlock = new FileContentIndexBlock();
-                        currentFileContentIndexBlock.set(newIndexBlock);
-                        newIndexBlock.addBlockPointer(freeBlockIndex);
-                        nextIndexBlocks.add(newIndexBlock);
-                    }
-                    return null;
-                }));
-
-        ByteBuffer firstIndexBytes = indexBlockSerializer.toByteBuffer(firstIndexBlock);
-        allocatedSpace.writeBlock(fileIndexBlock, firstIndexBytes);
-
-        int nextFileIndexBlockIndex = currentFileContentIndexBlock.get().getNextIndexBlock();
-        for (FileContentIndexBlock nextIndexBlock : nextIndexBlocks) {
-            allocatedSpace.writeBlock(nextFileIndexBlockIndex, indexBlockSerializer.toByteBuffer(nextIndexBlock));
-            nextFileIndexBlockIndex = nextIndexBlock.getNextIndexBlock();
+        log.debug("write file content in fs");
+        while (content.hasNextBlock()) {
+            chainIndex.appendBlock(content.readBlock());
         }
 
+        chainIndex.close();
         createFileRequest.getContent().close();
-
     }
 
     @Nonnull
     @Override
     public SeekableByteChannel readFile(@Nonnull String filename) throws IOException {
+        log.info("reading file: {}", filename);
         SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
         FileDescriptor fileDescriptor = getFileDescriptor(filename);
 
@@ -124,68 +128,29 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
     @Override
     public void updateFile(@Nonnull UpdateFileRequest updateFileRequest) throws IOException {
+        log.info("updating file: {}", updateFileRequest.getFilename());
         FileDescriptor fileDescriptor = getFileDescriptor(updateFileRequest.getFilename());
         BlockAllocatedSpace content = new BlockAllocatedSpace(allocatedSpace.getBlockSize(), AllocatedSpace.builder()
                 .data(updateFileRequest.getContent())
                 .build());
 
-        FileContentIndexBlock indexBlock;
+        log.debug("get file index block");
         int indexBlockIndex = fileDescriptor.getFileBlockIndex();
-        do {
-            ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
-            indexBlock = indexBlockSerializer.from(indexBlockBuffer);
+        ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
+        FileContentIndexBlock indexBlock = indexBlockSerializer.from(indexBlockBuffer);
 
-            for (int blockPointer : indexBlock.getBlockPointers()) {
-                if (content.containsNextBlock()) {
-                    ByteBuffer contentBlock = content.readBlock();
-                    allocatedSpace.writeBlock(blockPointer, contentBlock);
-                } else {
-                    allocatedSpace.fillBlockZeros(blockPointer);
-                    indexBlock.removeBlockPointer(blockPointer);
-                }
-            }
+        ChainedFileContentIndexBlock indexChain = chainedFileContentIndexBlockFactory.create(
+                fileDescriptor.getFileBlockIndex(), indexBlock, allocatedSpace);
 
-            // todo: P-6
-            ByteBuffer indexBuffer = indexBlockSerializer.toByteBuffer(indexBlock);
-            allocatedSpace.writeBlock(indexBlockIndex, indexBuffer);
-            if (indexBlock.containsNextBlock()) {
-                indexBlockIndex = indexBlock.getNextIndexBlock();
-            }
-        } while (indexBlock.containsNextBlock());
-
-        AtomicReference<FileContentIndexBlock> writeIndexBlock = new AtomicReference<>(indexBlock);
-        List<FileContentIndexBlock> newIndexBlocks = new ArrayList<>();
-        allocatedSpace.getFreeBlocksIndexStream()
-                .takeWhile(value -> avoidException(content::containsNextBlock))
-                .forEach(freeBlockIndex -> {
-                    if (!writeIndexBlock.get().addBlockPointer(freeBlockIndex)) {
-                        int free = allocatedSpace.getFirstFreeBlockIndex();
-                        allocatedSpace.markBlockAsAllocated(free);
-                        writeIndexBlock.get().setNextIndexBlock(free);
-                        writeIndexBlock.set(new FileContentIndexBlock());
-                        newIndexBlocks.add(writeIndexBlock.get());
-                    }
-                    avoidException(() -> {
-                        allocatedSpace.writeBlock(freeBlockIndex, avoidException(content::readBlock));
-                        return null;
-                    });
-                });
-
-        int index = indexBlockIndex;
-        FileContentIndexBlock currBlock = indexBlock;
-        Iterator<FileContentIndexBlock> iterator = newIndexBlocks.iterator();
-        do {
-            ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currBlock);
-            allocatedSpace.writeBlock(index, buffer);
-            index = currBlock.getNextIndexBlock();
-            if (index != 0) {
-                currBlock = iterator.next();
-            }
-        } while (index != 0);
+        log.debug("update file content");
+        Iterator<ByteBuffer> contentIterator = content.contentIterator();
+        indexChain.rewriteBlocks(contentIterator);
+        indexChain.close();
     }
 
     @Override
     public void deleteFile(@Nonnull String filename) throws IOException {
+        log.info("deleting file: {}", filename);
         Pair<FileDescriptorsBlock, Integer> pair = getFileDescriptorsBlock(filename);
         FileDescriptorsBlock fileDescriptorsBlock = pair.first();
         int fileDescriptorsBlockIndex = pair.second();

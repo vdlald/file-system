@@ -48,7 +48,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [-] T-7. Write data in blocks
 [x] T-12. Writing data - Serializing File descriptors
 [x] T-10. Writing data - Write file descriptor in descriptors block
-[x] T-13. Refactor whole project
+[x] T-13. Refactor entire project
 [x] T-14. Find the best block for filling a data
 [x] T-11. Writing data - Write file data in available place
 [x] T-15. Writing data - Write big file
@@ -57,8 +57,8 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-3. Reading files in FS
 [x] T-17. Delete file in FS
 [x] T-18. Update file in FS
-[ ] T-19. Refactor whole project
-[ ] P-6. update does not remove index blocks when compressing a file
+[x] T-19. Refactor entire project
+[x] P-6. update does not remove index blocks when compressing a file
 [ ] T-20. Work with different block sizes
 [ ] T-21. Write more tests
 [ ] P-1. Two files with same name problem

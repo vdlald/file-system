@@ -6,7 +6,9 @@ import lombok.Getter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Allows you to work with the allocated space in a per block manner
@@ -46,6 +48,15 @@ public class BlockAllocatedSpace {
     }
 
     @Nonnull
+    public Iterator<ByteBuffer> contentIterator() {
+        return Stream.iterate(
+                readBlock(),
+                buffer -> hasNextBlock(),
+                buffer -> readBlock()
+        ).iterator();
+    }
+
+    @Nonnull
     public ByteBuffer readBlock(int blockIndex) throws IOException {
         return allocatedSpace.position(blockStart(blockIndex))
                 .read(blockSize.getBlockSizeInBytes());
@@ -60,7 +71,7 @@ public class BlockAllocatedSpace {
         return allocate.rewind();
     }
 
-    public ByteBuffer readBlock() throws IOException {
+    public ByteBuffer readBlock() {
         return allocatedSpace.read(blockSize.getBlockSizeInBytes());
     }
 
@@ -77,7 +88,7 @@ public class BlockAllocatedSpace {
                 .write(data);
     }
 
-    public boolean containsNextBlock() throws IOException {
+    public boolean hasNextBlock() {
         return !allocatedSpace.isCurrentPositionMoreOrEqualsSizeOfChannel();
     }
 

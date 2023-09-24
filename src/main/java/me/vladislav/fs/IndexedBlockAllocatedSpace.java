@@ -5,6 +5,7 @@ import me.vladislav.fs.util.ByteBufferUtils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.util.PrimitiveIterator;
 import java.util.stream.IntStream;
 
 public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
@@ -38,8 +39,20 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
         super.fillBlockZeros(blockIndex);
     }
 
+    public int getFreeBlockIndexAndMarkAsAllocated() {
+        int freeBlockIndex = getFirstFreeBlockIndex();
+        markBlockAsAllocated(freeBlockIndex);
+        return freeBlockIndex;
+    }
+
     public int getFirstFreeBlockIndex() {
         for (int i = lastFreeBlockIndex; i < index.size(); i++) {
+            if (isBlockFree(i)) {
+                lastFreeBlockIndex = i;
+                return i;
+            }
+        }
+        for (int i = 0; i < lastFreeBlockIndex; i++) {
             if (isBlockFree(i)) {
                 lastFreeBlockIndex = i;
                 return i;
@@ -54,6 +67,10 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
 
     public void markBlockAsAllocated(int blockIndex) {
         index.set(blockIndex, false);
+    }
+
+    public PrimitiveIterator.OfInt getFreeBlocksIndexIterator() {
+        return getFreeBlocksIndexStream().iterator();
     }
 
     public IntStream getFreeBlocksIndexStream() {

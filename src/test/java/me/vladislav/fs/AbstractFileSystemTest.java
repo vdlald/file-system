@@ -33,7 +33,7 @@ public class AbstractFileSystemTest {
 
     public static final int KB_2 = 1024 * 2;
     public static final int KB_8 = 1024 * 8;
-    public static final int MB_8 = 1048576;
+    public static final int MB_8 = 1048576 * 8;
 
     @Autowired
     protected OpenFileSystemOperation openFileSystemOperation;
