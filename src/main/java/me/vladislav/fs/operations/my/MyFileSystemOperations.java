@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.BlockAllocatedSpace;
+import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
@@ -24,11 +25,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static me.vladislav.fs.BlockSize.KB_4;
 import static me.vladislav.fs.util.Utils.avoidException;
 
 @Builder(toBuilder = true)
 public class MyFileSystemOperations implements FileSystemOperations {
+
+    public static final String METHOD_NAME = "MYI";
 
     @Nonnull
     @Getter(onMethod = @__(@VisibleForTesting))
@@ -55,7 +57,8 @@ public class MyFileSystemOperations implements FileSystemOperations {
         AtomicReference<FileContentIndexBlock> currentFileContentIndexBlock = new AtomicReference<>(firstIndexBlock);
         List<FileContentIndexBlock> nextIndexBlocks = new ArrayList<>();
 
-        BlockAllocatedSpace content = new BlockAllocatedSpace(KB_4, AllocatedSpace.builder()
+        BlockSize blockSize = allocatedSpace.getBlockSize();
+        BlockAllocatedSpace content = new BlockAllocatedSpace(blockSize, AllocatedSpace.builder()
                 .data(createFileRequest.getContent())
                 .build())
                 .block(0);
@@ -63,7 +66,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
         allocatedSpace.getFreeBlocksIndexStream()
                 .takeWhile(value -> avoidException(() -> content.size() > written.get()))
                 .forEach(freeBlockIndex -> avoidException(() -> {
-                    written.addAndGet(KB_4.getBlockSizeInBytes());
+                    written.addAndGet(blockSize.getBlockSizeInBytes());
                     ByteBuffer data = content.readBlock();
                     allocatedSpace.writeBlock(freeBlockIndex, data);
 
@@ -127,7 +130,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
                 allocatedSpace.writeBlock(
                         blockIndex, descriptorsBlockSerializer.toByteBuffer(block));
 
-                return Pair.of(new FileDescriptorsBlock(), freeBlockIndex);
+                return Pair.of(new FileDescriptorsBlock(allocatedSpace.getBlockSize()), freeBlockIndex);
             }
             return getAvailableFileDescriptorsBlock(nextFileDescriptorBlock);
         }

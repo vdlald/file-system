@@ -49,4 +49,9 @@ public class ByteBufferUtils {
         seekableByteChannel.read(allocate);
         return allocate.rewind();
     }
+
+    public static ByteBuffer wrap(int value) {
+        ByteBuffer allocate = ByteBuffer.allocate(4);
+        return allocate.putInt(value).rewind();
+    }
 }

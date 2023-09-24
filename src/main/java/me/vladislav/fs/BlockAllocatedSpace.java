@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import static me.vladislav.fs.BlockSize.KB_4;
-
 /**
  * Allows you to work with the allocated space in a per block manner
  */
@@ -23,6 +21,7 @@ public class BlockAllocatedSpace {
     /**
      * Size of one block
      */
+    @Getter
     @Nonnull
     protected final BlockSize blockSize;
 
@@ -46,7 +45,7 @@ public class BlockAllocatedSpace {
 
     @Nonnull
     public ByteBuffer readBlocks(List<Integer> blockIndexes) throws IOException {
-        ByteBuffer allocate = ByteBuffer.allocate(blockIndexes.size() * KB_4.getBlockSizeInBytes()); //
+        ByteBuffer allocate = ByteBuffer.allocate(blockIndexes.size() * blockSize.getBlockSizeInBytes()); //
         for (Integer blockIndex : blockIndexes) {
             allocate.put(readBlock(blockIndex));
         }

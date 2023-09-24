@@ -1,6 +1,7 @@
 package me.vladislav.fs.blocks.serializers;
 
 import me.vladislav.fs.AbstractFileSystemTest;
+import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
@@ -45,7 +46,7 @@ public class BytesSerializerTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("FileDescriptorsBlock / Must converting to bytes and from bytes")
     void testFileDescriptorsBlockConvert() {
-        FileDescriptorsBlock block = new FileDescriptorsBlock();
+        FileDescriptorsBlock block = new FileDescriptorsBlock(BlockSize.KB_4);
 
         FileDescriptor expected1 = FileDescriptor.builder()
                 .filename(UUID.randomUUID().toString())

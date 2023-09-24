@@ -52,7 +52,8 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-14. Find the best block for filling a data
 [x] T-11. Writing data - Write file data in available place
 [x] T-15. Writing data - Write big file
-[ ] T-2. Simple creating file in FS
+[T-11] T-2. Simple creating file in FS
+[x] T-16. Save a block size of the FS in metadata
 [ ] T-3. Reading file in FS
 
 [ ] P-1. Two files with same name problem

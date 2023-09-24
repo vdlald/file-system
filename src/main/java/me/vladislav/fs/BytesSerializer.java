@@ -1,4 +1,4 @@
-package me.vladislav.fs.blocks.serializers;
+package me.vladislav.fs;
 
 import jakarta.annotation.Nonnull;
 

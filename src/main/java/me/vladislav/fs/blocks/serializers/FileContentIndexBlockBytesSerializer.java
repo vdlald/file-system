@@ -1,5 +1,6 @@
 package me.vladislav.fs.blocks.serializers;
 
+import me.vladislav.fs.BytesSerializer;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,8 @@
 package me.vladislav.fs.blocks.serializers;
 
 import lombok.RequiredArgsConstructor;
+import me.vladislav.fs.BlockSize;
+import me.vladislav.fs.BytesSerializer;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
 import me.vladislav.fs.util.ByteBufferUtils;
@@ -16,7 +18,11 @@ public class FileDescriptorsBlockBytesSerializer implements BytesSerializer<File
 
     @Override
     public FileDescriptorsBlock from(ByteBuffer src) {
-        FileDescriptorsBlock descriptors = new FileDescriptorsBlock();
+        return from(src, BlockSize.KB_4);
+    }
+
+    public FileDescriptorsBlock from(ByteBuffer src, BlockSize blockSize) {
+        FileDescriptorsBlock descriptors = new FileDescriptorsBlock(blockSize);
         int read;
         for (read = 0; read < FileDescriptorsBlock.DESCRIPTORS_SIZE; read += FileDescriptor.TOTAL_SIZE) {
             ByteBuffer descriptorBuffer = src.slice(read, FileDescriptor.TOTAL_SIZE);

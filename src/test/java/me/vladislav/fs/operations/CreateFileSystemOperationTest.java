@@ -2,6 +2,7 @@ package me.vladislav.fs.operations;
 
 import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.FileSystem;
+import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
+import static me.vladislav.fs.BlockSize.KB_4;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateFileSystemOperationTest extends AbstractFileSystemTest {
@@ -40,5 +42,7 @@ public class CreateFileSystemOperationTest extends AbstractFileSystemTest {
     void testCreateFileSystemFileWithMetadata() {
         FileSystem.Metadata metadata = fileSystem.getMetadata();
         assertNotNull(metadata.getCreatedAt());
+        assertEquals(MyFileSystemOperations.METHOD_NAME, metadata.getFileAllocationMethod());
+        assertEquals(KB_4, metadata.getBlockSize());
     }
 }

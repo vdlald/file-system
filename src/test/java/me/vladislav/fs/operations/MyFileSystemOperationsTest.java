@@ -1,9 +1,6 @@
 package me.vladislav.fs.operations;
 
-import me.vladislav.fs.AbstractFileSystemTest;
-import me.vladislav.fs.AllocatedSpace;
-import me.vladislav.fs.BlockAllocatedSpace;
-import me.vladislav.fs.BlockSize;
+import me.vladislav.fs.*;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
@@ -14,6 +11,8 @@ import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.ByteBuffer;
@@ -112,9 +111,13 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         file.close();
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(BlockSize.class)
     @DisplayName("File creation / File content must be written / Big big file")
-    void testCreateBigBigFileContent() throws Exception {
+    void testCreateBigBigFileContent(BlockSize blockSize) throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(blockSize));
+
         CreateFileRequest request = createFileRequest(readJbFile());
 
         fileSystem.getFileSystemOperations().createFile(request);
@@ -145,11 +148,16 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
             assertEquals(expected, actual);
         }
         file.close();
+        fileSystem.close();
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(BlockSize.class)
     @DisplayName("File creation / Must save both files")
-    void testCreateTwoFilesContent() throws Exception {
+    void testCreateTwoFilesContent(BlockSize blockSize) throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(blockSize));
+
         CreateFileRequest request1 = createFileRequest(readJbFile());
         fileSystem.getFileSystemOperations().createFile(request1);
 
@@ -208,6 +216,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
             );
         }
         file.close();
+        fileSystem.close();
     }
 
     @Test

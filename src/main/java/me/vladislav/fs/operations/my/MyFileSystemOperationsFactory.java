@@ -21,9 +21,12 @@ public class MyFileSystemOperationsFactory {
     private final FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
 
     @Nonnull
-    public MyFileSystemOperations create(@Nonnull AllocatedSpace allocatedSpace) throws IOException {
+    public MyFileSystemOperations create(
+            @Nonnull AllocatedSpace allocatedSpace,
+            @Nonnull BlockSize blockSize
+    ) throws IOException {
         return objectProvider.getObject(
-                new IndexedBlockAllocatedSpace(BlockSize.KB_4, allocatedSpace),
+                new IndexedBlockAllocatedSpace(blockSize, allocatedSpace),
                 indexBlockBytesSerializer,
                 fileDescriptorsBlockBytesSerializer
         );

@@ -3,9 +3,12 @@ package me.vladislav.fs.requests;
 import jakarta.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.With;
+import me.vladislav.fs.BlockSize;
 
 import java.nio.file.Path;
 
+@With
 @Getter
 @Builder(toBuilder = true)
 public class CreateFileSystemRequest {
@@ -20,10 +23,15 @@ public class CreateFileSystemRequest {
      * How to name a file system
      */
     @Nonnull
-    private final String fileSystemName;
+    @Builder.Default
+    private final String fileSystemName = "filesystem";
 
     /**
      * How much space to allocate to the file system beforehand
      */
-    private final int initialSizeInBytes;
+    @Builder.Default
+    private final int initialSizeInBytes = BlockSize.KB_4.getBlockSizeInBytes();
+
+    @Builder.Default
+    private final BlockSize blockSize = BlockSize.KB_4;
 }
