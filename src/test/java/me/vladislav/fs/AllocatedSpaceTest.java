@@ -1,18 +1,23 @@
 package me.vladislav.fs;
 
 import me.vladislav.fs.requests.CreateFileSystemRequest;
+import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AllocatedSpaceTest extends AbstractFileSystemTest {
 
     @Test
-    @DisplayName("AllocatedSpace / Must write and read")
+    @DisplayName("Must write and read")
     void testRW() throws IOException {
         AllocatedSpace allocatedSpace = fileSystem.getAllocatedSpace();
 
@@ -29,6 +34,37 @@ public class AllocatedSpaceTest extends AbstractFileSystemTest {
         ByteBuffer wrap = ByteBuffer.wrap("some text".getBytes(StandardCharsets.UTF_8));
         allocatedSpace.position(20).write(wrap);
         assertIsNotEmpty(allocatedSpace.position(20).read(20));
+    }
+
+    @Test
+    @DisplayName("Must be reading with an offset")
+    void testOffset() throws IOException {
+        SeekableByteChannel file = createTempFile("some content");
+
+        AllocatedSpace allocatedSpace = AllocatedSpace.builder()
+                .data(file)
+                .startOffset(5)
+                .build();
+
+        String actual = ByteBufferUtils.readToString(allocatedSpace.read(7));
+        assertEquals("content", actual);
+
+        allocatedSpace.close();
+    }
+
+    @Test
+    @DisplayName("Mustn't allow to go outside of the offset")
+    void testOffsetBreak() throws IOException {
+        SeekableByteChannel file = createTempFile("some content");
+
+        AllocatedSpace allocatedSpace = AllocatedSpace.builder()
+                .data(file)
+                .startOffset(5)
+                .build();
+
+        assertThrows(IndexOutOfBoundsException.class, () -> allocatedSpace.position(-5));
+
+        allocatedSpace.close();
     }
 
     @Nonnull

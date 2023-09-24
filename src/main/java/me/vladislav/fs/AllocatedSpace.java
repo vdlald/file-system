@@ -14,11 +14,10 @@ import java.nio.charset.StandardCharsets;
 /**
  * Represents an allocated space somewhere
  */
-@Builder
 public class AllocatedSpace implements Closeable {
 
     /**
-     * Reserved space at the beginning
+     * Reserved space at the beginning of data
      */
     @With
     private final long startOffset;
@@ -28,6 +27,19 @@ public class AllocatedSpace implements Closeable {
      */
     @Nonnull
     private final SeekableByteChannel data;
+
+    @Builder(toBuilder = true)
+    public AllocatedSpace(long startOffset, SeekableByteChannel data) {
+        this.startOffset = startOffset;
+        this.data = data;
+        try {
+            if (data.position() < startOffset) {
+                data.position(startOffset);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public boolean isOpen() {
         return data.isOpen();
@@ -85,7 +97,13 @@ public class AllocatedSpace implements Closeable {
 
     @Nonnull
     public AllocatedSpace position(long newPosition) throws IOException {
-        data.position(startOffset + newPosition);
+        long actualPosition = startOffset + newPosition;
+        if (actualPosition < startOffset) {
+            throw new IndexOutOfBoundsException(
+                    "startOffset: %s, actualPosition: %s".formatted(startOffset, actualPosition)
+            );
+        }
+        data.position(actualPosition);
         return this;
     }
 
