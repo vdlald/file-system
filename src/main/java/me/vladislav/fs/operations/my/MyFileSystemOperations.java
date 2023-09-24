@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -66,7 +67,12 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
     @Override
     public void createFile(@Nonnull CreateFileRequest createFileRequest) throws IOException {
-        log.info("creating file: {}", createFileRequest.getFilename());
+        String filename = createFileRequest.getFilename();
+        log.info("creating file: {}", filename);
+
+        if (getFileDescriptorsBlock(filename).getFirst() != null) {
+            throw new FileAlreadyExistsException(filename);
+        }
 
         log.debug("find file descriptor block with free space");
         var block = getAvailableFileDescriptorsBlock();
@@ -76,7 +82,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
         log.debug("save file descriptor in block: {}", blockIndex);
         int fileIndexBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
         FileDescriptor fileDescriptor = FileDescriptor.builder()
-                .filename(createFileRequest.getFilename())
+                .filename(filename)
                 .fileBlockIndex(fileIndexBlock)
                 .build();
         descriptorsBlock.addDescriptor(fileDescriptor);
@@ -152,6 +158,9 @@ public class MyFileSystemOperations implements FileSystemOperations {
     public void deleteFile(@Nonnull String filename) throws IOException {
         log.info("deleting file: {}", filename);
         Pair<FileDescriptorsBlock, Integer> pair = getFileDescriptorsBlock(filename);
+        if (pair.getFirst() == null) {
+            throw new FileNotFoundException();
+        }
         FileDescriptorsBlock fileDescriptorsBlock = pair.first();
         int fileDescriptorsBlockIndex = pair.second();
 
@@ -203,7 +212,11 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
     @Nonnull
     private FileDescriptor getFileDescriptor(@Nonnull String filename) throws IOException {
-        return getFileDescriptorsBlock(filename).first().getDescriptor(filename);
+        Pair<FileDescriptorsBlock, Integer> fileDescriptorsBlock = getFileDescriptorsBlock(filename);
+        if (fileDescriptorsBlock.getFirst() == null) {
+            throw new FileNotFoundException();
+        }
+        return fileDescriptorsBlock.first().getDescriptor(filename);
     }
 
     @Nonnull
@@ -224,7 +237,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
         } while (descriptor.isEmpty() && descriptors.containsNextBlock());
 
         if (descriptor.isEmpty()) {
-            throw new FileNotFoundException();
+            return Pair.of(null, null);
         }
 
         return Pair.of(descriptors, nextBlock);

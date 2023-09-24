@@ -59,7 +59,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-18. Update file in FS
 [x] T-19. Refactor entire project
 [x] P-6. update does not remove index blocks when compressing a file
-[ ] P-1. Two files with same name problem
+[x] P-1. Two files with same name problem
 [ ] P-4. Allocated space offset validation
 [ ] T-22. Write more documentation
 [ ] T-20. Work with different block sizes
