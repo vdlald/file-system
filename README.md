@@ -57,27 +57,26 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-3. Reading files in FS
 [x] T-17. Delete file in FS
 [x] T-18. Update file in FS
-
-[ ] P-1. Two files with same name problem
-[ ] P-2. FS initial max size is only 2GB
-[ ] P-3. The initial metadata size should not be in the initial metadata size
-[ ] P-4. Allocated space offset validation
-[ ] P-5. readBlocks can not allocate more than Integer.MAX bytes
+[ ] T-19. Refactor whole project
 [ ] P-6. update does not remove index blocks when compressing a file
+[ ] T-20. Work with different block sizes
+[ ] T-21. Write more tests
+[ ] P-1. Two files with same name problem
+[ ] P-4. Allocated space offset validation
+[ ] T-22. Write more documentation
+[ ] T-23. Wrap it in console app
+[ ] T-24. Check speed of RW-operations
 
-## T-0. Base project template
+[ ] P-2. FS initial max size is only 2GB
+[-] P-3. The initial metadata size should not be in the initial metadata size
+[ ] P-5. readBlocks can not allocate more than Integer.MAX bytes
 
-~~I will use Indexed Allocation as File Allocation Method~~
-I decided to use a simpler way to allocate memory
+[ ] FR-1. Compress data
+[ ] FR-2. Encrypt data
+[ ] FR-3. Defragmentation
 
 # Researching
 
 1. https://www.geeksforgeeks.org/file-systems-in-operating-system/
 2. https://github.com/seclerp/FileFS/blob/master/docs/Architecture-overview.md
 3. https://www.geeksforgeeks.org/difference-between-internal-and-external-fragmentation/
-
-# Notes
-
-22.09.2023 09:04
-From this point on, I think I understand what the structure looks like. I need to refactor the code so that it will be
-easier to write further on
