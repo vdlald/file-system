@@ -61,9 +61,9 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] P-6. update does not remove index blocks when compressing a file
 [x] P-1. Two files with same name problem
 [x] P-4. Allocated space offset validation
+[ ] T-21. Write more tests
 [ ] T-22. Write more documentation
 [ ] T-20. Work with different block sizes
-[ ] T-21. Write more tests
 [ ] T-23. Wrap it in console app
 [ ] T-24. Check speed of RW-operations
 

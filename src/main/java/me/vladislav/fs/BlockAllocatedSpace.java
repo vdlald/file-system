@@ -84,6 +84,10 @@ public class BlockAllocatedSpace {
             throw new RuntimeException();
         }
 
+        if (blockIndex + 1 > blocksAmount) {
+            blocksAmount = blockIndex + 1;
+        }
+
         allocatedSpace.position(blockStart(blockIndex))
                 .write(data);
     }

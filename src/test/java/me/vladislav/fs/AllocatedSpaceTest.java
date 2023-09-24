@@ -67,6 +67,21 @@ public class AllocatedSpaceTest extends AbstractFileSystemTest {
         allocatedSpace.close();
     }
 
+    @Test
+    @DisplayName("Must allow for increasing file size")
+    void testPositionOutside() throws IOException {
+        SeekableByteChannel file = createTempFile("some content");
+
+        AllocatedSpace allocatedSpace = AllocatedSpace.builder()
+                .data(file)
+                .build();
+
+        allocatedSpace.position(20).writeString("text");
+        assertEquals(24, allocatedSpace.size());
+
+        allocatedSpace.close();
+    }
+
     @Nonnull
     @Override
     protected CreateFileSystemRequest getCreateFileSystemRequest() {
