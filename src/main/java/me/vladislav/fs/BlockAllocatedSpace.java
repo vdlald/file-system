@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.util.List;
 
 /**
@@ -37,6 +38,13 @@ public class BlockAllocatedSpace {
         blocksAmount = (int) (allocatedSpace.size() / blockSize.getBlockSizeInBytes());
     }
 
+    public static BlockAllocatedSpace of(SeekableByteChannel channel) throws IOException {
+        AllocatedSpace allocatedSpace = AllocatedSpace.builder()
+                .data(channel)
+                .build();
+        return new BlockAllocatedSpace(BlockSize.KB_4, allocatedSpace);
+    }
+
     @Nonnull
     public ByteBuffer readBlock(int blockIndex) throws IOException {
         return allocatedSpace.position(blockStart(blockIndex))
@@ -67,6 +75,10 @@ public class BlockAllocatedSpace {
 
         allocatedSpace.position(blockStart(blockIndex))
                 .write(data);
+    }
+
+    public boolean containsNextBlock() throws IOException {
+        return !allocatedSpace.isCurrentPositionMoreOrEqualsSizeOfChannel();
     }
 
     public BlockAllocatedSpace block(int blockIndex) throws IOException {

@@ -8,6 +8,7 @@ import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
+import me.vladislav.fs.requests.UpdateFileRequest;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -270,6 +271,68 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
             try (SeekableByteChannel file = fsOperations.readFile(request.getFilename())) {
             }
         });
+
+        fileSystem.close();
+    }
+
+    @ParameterizedTest
+    @EnumSource(BlockSize.class)
+    @DisplayName("File create and update / Big big file / shrink")
+    void testCreateAndUpdateShrink(BlockSize blockSize) throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(blockSize));
+
+        CreateFileRequest request = createFileRequest(readJbFile());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+
+        String filename = request.getFilename();
+        UpdateFileRequest updateFileRequest = UpdateFileRequest.builder()
+                .filename(filename)
+                .content(readCvFile())
+                .build();
+
+        fsOperations.updateFile(updateFileRequest);
+
+        BlockAllocatedSpace actual = BlockAllocatedSpace.of(fsOperations.readFile(filename));
+        BlockAllocatedSpace expected = BlockAllocatedSpace.of(readCvFile());
+
+        for (int i = 0; i < expected.getBlocksAmount(); i++) {
+            assertEquals(expected.readBlock(i), actual.readBlock(i));
+        }
+
+        fileSystem.close();
+    }
+
+    @ParameterizedTest
+    @EnumSource(BlockSize.class)
+    @DisplayName("File create and update / Big big file / extend file")
+    void testCreateAndUpdateExtend(BlockSize blockSize) throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(blockSize));
+
+        CreateFileRequest request = createFileRequest(readCvFile());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+
+        String filename = request.getFilename();
+        UpdateFileRequest updateFileRequest = UpdateFileRequest.builder()
+                .filename(filename)
+                .content(readJbFile())
+                .build();
+
+        fsOperations.updateFile(updateFileRequest);
+
+        BlockAllocatedSpace actual = BlockAllocatedSpace.of(fsOperations.readFile(filename));
+        BlockAllocatedSpace expected = BlockAllocatedSpace.of(readJbFile());
+
+        for (int i = 0; i < expected.getBlocksAmount(); i++) {
+            assertEquals(expected.readBlock(i), actual.readBlock(i));
+        }
 
         fileSystem.close();
     }

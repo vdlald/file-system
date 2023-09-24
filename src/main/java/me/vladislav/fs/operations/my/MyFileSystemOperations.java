@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -119,12 +120,68 @@ public class MyFileSystemOperations implements FileSystemOperations {
             indexBlockIndex = indexBlock.getNextIndexBlock();
         } while (indexBlock.containsNextBlock());
         return channel.position(0);
-
     }
 
     @Override
-    public void updateFile(@Nonnull UpdateFileRequest updateFileRequest) {
+    public void updateFile(@Nonnull UpdateFileRequest updateFileRequest) throws IOException {
+        FileDescriptor fileDescriptor = getFileDescriptor(updateFileRequest.getFilename());
+        BlockAllocatedSpace content = new BlockAllocatedSpace(allocatedSpace.getBlockSize(), AllocatedSpace.builder()
+                .data(updateFileRequest.getContent())
+                .build());
 
+        FileContentIndexBlock indexBlock;
+        int indexBlockIndex = fileDescriptor.getFileBlockIndex();
+        do {
+            ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
+            indexBlock = indexBlockSerializer.from(indexBlockBuffer);
+
+            for (int blockPointer : indexBlock.getBlockPointers()) {
+                if (content.containsNextBlock()) {
+                    ByteBuffer contentBlock = content.readBlock();
+                    allocatedSpace.writeBlock(blockPointer, contentBlock);
+                } else {
+                    allocatedSpace.fillBlockZeros(blockPointer);
+                    indexBlock.removeBlockPointer(blockPointer);
+                }
+            }
+
+            // todo: P-6
+            ByteBuffer indexBuffer = indexBlockSerializer.toByteBuffer(indexBlock);
+            allocatedSpace.writeBlock(indexBlockIndex, indexBuffer);
+            if (indexBlock.containsNextBlock()) {
+                indexBlockIndex = indexBlock.getNextIndexBlock();
+            }
+        } while (indexBlock.containsNextBlock());
+
+        AtomicReference<FileContentIndexBlock> writeIndexBlock = new AtomicReference<>(indexBlock);
+        List<FileContentIndexBlock> newIndexBlocks = new ArrayList<>();
+        allocatedSpace.getFreeBlocksIndexStream()
+                .takeWhile(value -> avoidException(content::containsNextBlock))
+                .forEach(freeBlockIndex -> {
+                    if (!writeIndexBlock.get().addBlockPointer(freeBlockIndex)) {
+                        int free = allocatedSpace.getFirstFreeBlockIndex();
+                        allocatedSpace.markBlockAsAllocated(free);
+                        writeIndexBlock.get().setNextIndexBlock(free);
+                        writeIndexBlock.set(new FileContentIndexBlock());
+                        newIndexBlocks.add(writeIndexBlock.get());
+                    }
+                    avoidException(() -> {
+                        allocatedSpace.writeBlock(freeBlockIndex, avoidException(content::readBlock));
+                        return null;
+                    });
+                });
+
+        int index = indexBlockIndex;
+        FileContentIndexBlock currBlock = indexBlock;
+        Iterator<FileContentIndexBlock> iterator = newIndexBlocks.iterator();
+        do {
+            ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currBlock);
+            allocatedSpace.writeBlock(index, buffer);
+            index = currBlock.getNextIndexBlock();
+            if (index != 0) {
+                currBlock = iterator.next();
+            }
+        } while (index != 0);
     }
 
     @Override

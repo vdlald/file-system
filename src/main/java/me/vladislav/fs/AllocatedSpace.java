@@ -85,6 +85,10 @@ public class AllocatedSpace implements Closeable {
         return this;
     }
 
+    public boolean isCurrentPositionMoreOrEqualsSizeOfChannel() throws IOException {
+        return data.position() >= data.size();
+    }
+
     public long size() throws IOException {
         return data.size() - startOffset;
     }

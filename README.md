@@ -8,7 +8,7 @@ There should be support for at least:
 [x] creating
 [x] reading
 [x] deleting
-[ ] updating files
+[x] updating files
 
 [ ] There should be a documented API for working with the file system
 [ ] The code must be close to production quality, including tests.
@@ -56,12 +56,14 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-16. Save a block size of the FS in metadata
 [x] T-3. Reading files in FS
 [x] T-17. Delete file in FS
+[x] T-18. Update file in FS
 
 [ ] P-1. Two files with same name problem
 [ ] P-2. FS initial max size is only 2GB
 [ ] P-3. The initial metadata size should not be in the initial metadata size
 [ ] P-4. Allocated space offset validation
 [ ] P-5. readBlocks can not allocate more than Integer.MAX bytes
+[ ] P-6. update does not remove index blocks when compressing a file
 
 ## T-0. Base project template
 

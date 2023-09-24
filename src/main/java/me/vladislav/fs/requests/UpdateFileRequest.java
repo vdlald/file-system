@@ -2,17 +2,19 @@ package me.vladislav.fs.requests;
 
 import jakarta.annotation.Nonnull;
 import lombok.Builder;
+import lombok.Getter;
 
-import java.io.ByteArrayInputStream;
+import java.nio.channels.SeekableByteChannel;
 
+@Getter
 @Builder(toBuilder = true)
 public class UpdateFileRequest {
 
     // content of file to update
     @Nonnull
-    private final ByteArrayInputStream content;
+    private final SeekableByteChannel content;
 
     // name of file to update
     @Nonnull
-    private final String name;
+    private final String filename;
 }

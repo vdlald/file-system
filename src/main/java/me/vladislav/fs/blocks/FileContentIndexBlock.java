@@ -37,6 +37,10 @@ public class FileContentIndexBlock {
         return true;
     }
 
+    public void removeBlockPointer(int blockIndex) {
+        blockPointers.remove((Integer) blockIndex);
+    }
+
     public boolean isFull() {
         return blockPointers.size() >= MAX_BLOCK_POINTERS;
     }

@@ -14,7 +14,7 @@ public interface FileSystemOperations {
     @Nonnull
     SeekableByteChannel readFile(@Nonnull String fileName) throws IOException;
 
-    void updateFile(@Nonnull UpdateFileRequest updateFileRequest);
+    void updateFile(@Nonnull UpdateFileRequest updateFileRequest) throws IOException;
 
     // todo: Q-5 ?
     void deleteFile(@Nonnull String fileName) throws IOException;
