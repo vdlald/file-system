@@ -19,6 +19,7 @@ import me.vladislav.fs.requests.UpdateFileRequest;
 import me.vladislav.fs.util.Pair;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -127,8 +128,30 @@ public class MyFileSystemOperations implements FileSystemOperations {
     }
 
     @Override
-    public void deleteFile(@Nonnull String fileName) {
+    public void deleteFile(@Nonnull String filename) throws IOException {
+        Pair<FileDescriptorsBlock, Integer> pair = getFileDescriptorsBlock(filename);
+        FileDescriptorsBlock fileDescriptorsBlock = pair.first();
+        int fileDescriptorsBlockIndex = pair.second();
 
+        FileDescriptor fileDescriptor = fileDescriptorsBlock.getDescriptor(filename);
+        assert fileDescriptor != null;
+
+        FileContentIndexBlock indexBlock;
+        int indexBlockIndex = fileDescriptor.getFileBlockIndex();
+        do {
+            ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
+            indexBlock = indexBlockSerializer.from(indexBlockBuffer);
+
+            for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
+                allocatedSpace.fillBlockZeros(indexBlock.getBlockPointers().get(i));
+            }
+            allocatedSpace.fillBlockZeros(indexBlockIndex);
+            indexBlockIndex = indexBlock.getNextIndexBlock();
+        } while (indexBlock.containsNextBlock());
+
+        fileDescriptorsBlock.removeDescriptor(filename);
+        ByteBuffer descriptorsBlockBuffer = descriptorsBlockSerializer.toByteBuffer(fileDescriptorsBlock);
+        allocatedSpace.writeBlock(fileDescriptorsBlockIndex, descriptorsBlockBuffer);
     }
 
     @Nonnull
@@ -158,6 +181,11 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
     @Nonnull
     private FileDescriptor getFileDescriptor(@Nonnull String filename) throws IOException {
+        return getFileDescriptorsBlock(filename).first().getDescriptor(filename);
+    }
+
+    @Nonnull
+    private Pair<FileDescriptorsBlock, Integer> getFileDescriptorsBlock(@Nonnull String filename) throws IOException {
         FileDescriptorsBlock descriptors;
         Optional<FileDescriptor> descriptor;
         int nextBlock = 0;
@@ -168,13 +196,15 @@ public class MyFileSystemOperations implements FileSystemOperations {
             descriptor = descriptors.getDescriptors().stream()
                     .filter(fileDescriptor -> filename.equals(fileDescriptor.getFilename()))
                     .findFirst();
-            nextBlock = descriptors.getNextFileDescriptorBlock();
+            if (descriptor.isEmpty()) {
+                nextBlock = descriptors.getNextFileDescriptorBlock();
+            }
         } while (descriptor.isEmpty() && descriptors.containsNextBlock());
 
         if (descriptor.isEmpty()) {
-            throw new RuntimeException("not found");
+            throw new FileNotFoundException();
         }
 
-        return descriptor.get();
+        return Pair.of(descriptors, nextBlock);
     }
 }

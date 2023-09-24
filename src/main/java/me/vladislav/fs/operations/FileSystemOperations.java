@@ -17,5 +17,5 @@ public interface FileSystemOperations {
     void updateFile(@Nonnull UpdateFileRequest updateFileRequest);
 
     // todo: Q-5 ?
-    void deleteFile(@Nonnull String fileName);
+    void deleteFile(@Nonnull String fileName) throws IOException;
 }

@@ -45,9 +45,20 @@ public class FileDescriptorsBlock {
         return new ArrayList<>(descriptors);
     }
 
+    public void removeDescriptor(@Nonnull String filename) {
+        descriptors.remove(getDescriptor(filename));
+    }
+
     @Nullable
     public FileDescriptor getDescriptor(int index) {
         return descriptors.get(index);
+    }
+
+    @Nullable
+    public FileDescriptor getDescriptor(@Nonnull String filename) {
+        return descriptors.stream()
+                .filter(descriptor -> descriptor.getFilename().equals(filename))
+                .findFirst().orElse(null);
     }
 
     public boolean isEmpty() {

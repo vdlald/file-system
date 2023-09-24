@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 
@@ -219,7 +220,6 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
-
     @ParameterizedTest
     @EnumSource(BlockSize.class)
     @DisplayName("File read and create / Big big file")
@@ -250,6 +250,27 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
             assertEquals(expected, actual);
         }
         file.close();
+        fileSystem.close();
+    }
+
+    @ParameterizedTest
+    @EnumSource(BlockSize.class)
+    @DisplayName("File create and delete / Big big file")
+    void testCreateAndDelete(BlockSize blockSize) throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(blockSize));
+
+        CreateFileRequest request = createFileRequest(readJbFile());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        fsOperations.deleteFile(request.getFilename());
+        assertThrows(FileNotFoundException.class, () -> {
+            try (SeekableByteChannel file = fsOperations.readFile(request.getFilename())) {
+            }
+        });
+
         fileSystem.close();
     }
 

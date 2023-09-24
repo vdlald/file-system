@@ -6,8 +6,8 @@ Implement a file system (FS) based on a single file (all data must be stored wit
 
 There should be support for at least:
 [x] creating
-[ ] reading
-[ ] deleting
+[x] reading
+[x] deleting
 [ ] updating files
 
 [ ] There should be a documented API for working with the file system
@@ -55,6 +55,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [T-11] T-2. Simple creating file in FS
 [x] T-16. Save a block size of the FS in metadata
 [x] T-3. Reading files in FS
+[x] T-17. Delete file in FS
 
 [ ] P-1. Two files with same name problem
 [ ] P-2. FS initial max size is only 2GB

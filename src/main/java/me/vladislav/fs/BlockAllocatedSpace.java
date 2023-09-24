@@ -56,6 +56,10 @@ public class BlockAllocatedSpace {
         return allocatedSpace.read(blockSize.getBlockSizeInBytes());
     }
 
+    protected void fillBlockZeros(int blockIndex) throws IOException {
+        writeBlock(blockIndex, ByteBuffer.allocate(blockSize.getBlockSizeInBytes()));
+    }
+
     public void writeBlock(int blockIndex, @Nonnull ByteBuffer data) throws IOException {
         if (data.array().length > blockSize.getBlockSizeInBytes()) {
             throw new RuntimeException();

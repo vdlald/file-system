@@ -33,6 +33,11 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
         super.writeBlock(blockIndex, data);
     }
 
+    public void fillBlockZeros(int blockIndex) throws IOException {
+        index.set(blockIndex, true);
+        super.fillBlockZeros(blockIndex);
+    }
+
     public int getFirstFreeBlockIndex() {
         for (int i = lastFreeBlockIndex; i < index.size(); i++) {
             if (isBlockFree(i)) {
