@@ -74,7 +74,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
 
             int blockPointer;
             if (i >= currentBlock.size()) {
-                blockPointer = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
+                blockPointer = allocatedSpace.getFreeBlockIndex();
                 currentBlock.addBlockPointer(blockPointer);
             } else {
                 blockPointer = currentBlock.getBlockPointers().get(i);
@@ -106,6 +106,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
 
             nextBlock = indexBlock.getNextIndexBlock();
         }
+        allocatedSpace.writeBlock(currentBlockIndex, indexBlockSerializer.toByteBuffer(currentBlock));
 
         resetToFirstBlock();
     }
@@ -125,7 +126,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
             currentBlockIndex = nextBlockIndex;
             currentBlock = indexBlockSerializer.from(nextBlockBytes);
         } else {
-            int allocatedBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
+            int allocatedBlock = allocatedSpace.getFreeBlockIndex();
             currentBlock.setNextIndexBlock(allocatedBlock);
             ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currentBlock);
             allocatedSpace.writeBlock(currentBlockIndex, buffer);

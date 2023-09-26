@@ -197,7 +197,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
         if (block.isFull()) {
             int nextFileDescriptorBlock = block.getNextFileDescriptorBlock();
             if (nextFileDescriptorBlock == 0) {
-                int freeBlockIndex = allocatedSpace.getFirstFreeBlockIndex();
+                int freeBlockIndex = allocatedSpace.getFreeBlockIndex();
 
                 block.setNextFileDescriptorBlock(freeBlockIndex);
                 allocatedSpace.writeBlock(

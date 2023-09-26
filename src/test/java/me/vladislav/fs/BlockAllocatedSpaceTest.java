@@ -1,5 +1,6 @@
 package me.vladislav.fs;
 
+import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,11 +9,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.UUID;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+@Slf4j
 public class BlockAllocatedSpaceTest extends AbstractFileSystemTest {
 
     @Test
@@ -108,5 +112,31 @@ public class BlockAllocatedSpaceTest extends AbstractFileSystemTest {
         allocatedSpace.writeBlock(1, expected);
 
         assertEquals(2, allocatedSpace.getBlocksAmount());
+    }
+
+    @Test
+    @DisplayName("The number of blocks must be correctly counted")
+    void testAmountOfBlockCalc() throws IOException {
+        BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(readCat2());
+        assertEquals(10, allocatedSpace.blocksAmount);
+    }
+
+    @Test
+    @DisplayName("The iterator has to go through all the blocks")
+    void testContentIterator() throws IOException {
+        BlockAllocatedSpace expected = BlockAllocatedSpace.of(readCat2());
+        BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(readCat2());
+
+        int i = 0;
+        Iterator<ByteBuffer> iterator = allocatedSpace.contentIterator();
+        while (expected.hasNextBlock()) {
+            log.info("block: {}", i);
+            ByteBuffer e = expected.readBlock();
+            ByteBuffer a = iterator.next();
+            assertEquals(e, a);
+            i++;
+        }
+        assertEquals(expected.blocksAmount, i);
+        assertFalse(iterator.hasNext());
     }
 }

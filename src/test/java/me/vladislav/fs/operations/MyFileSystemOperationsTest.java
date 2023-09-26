@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 
@@ -346,5 +347,75 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.getFileSystemOperations().createFile(request);
 
         assertFalse(request.getContent().isOpen());
+    }
+
+    @Test
+    @DisplayName("Check a series of file creations, deletions, updates and reads")
+    void testComplexBehavior() throws IOException {
+        BlockAllocatedSpace cat2 = BlockAllocatedSpace.of(readCat2());
+        BlockAllocatedSpace cat3 = BlockAllocatedSpace.of(readCat3());
+        BlockAllocatedSpace cat4 = BlockAllocatedSpace.of(readCat4());
+        BlockAllocatedSpace cat5 = BlockAllocatedSpace.of(readCat5());
+        BlockAllocatedSpace jb = BlockAllocatedSpace.of(readJbFile());
+
+        FileSystemOperations operations = fileSystem.getFileSystemOperations();
+
+        CreateFileRequest createCat1 = createFileRequest(readCat1());
+        operations.createFile(createCat1);
+
+        CreateFileRequest createCat2 = createFileRequest(readCat2());
+        operations.createFile(createCat2);
+
+        operations.deleteFile(createCat2.getFilename());
+
+        assertThrows(FileNotFoundException.class, () -> operations.readFile(createCat2.getFilename()));
+
+        operations.updateFile(UpdateFileRequest.builder()
+                .filename(createCat1.getFilename())
+                .content(readCat2())
+                .build());
+
+        assertAllocatedSpaceEquals(
+                cat2,
+                BlockAllocatedSpace.of(operations.readFile(createCat1.getFilename()))
+        );
+
+        operations.updateFile(UpdateFileRequest.builder()
+                .filename(createCat1.getFilename())
+                .content(readCat4())
+                .build());
+
+        assertAllocatedSpaceEquals(
+                cat4,
+                BlockAllocatedSpace.of(operations.readFile(createCat1.getFilename()))
+        );
+
+        operations.updateFile(UpdateFileRequest.builder()
+                .filename(createCat1.getFilename())
+                .content(readCat3())
+                .build());
+
+        BlockAllocatedSpace file1Actual = BlockAllocatedSpace.of(operations.readFile(createCat1.getFilename()));
+        assertAllocatedSpaceEquals(cat3, file1Actual);
+        file1Actual.close();
+
+        CreateFileRequest createCat5 = createFileRequest(readCat5());
+        operations.createFile(createCat5);
+
+        BlockAllocatedSpace file2Actual = BlockAllocatedSpace.of(operations.readFile(createCat5.getFilename()));
+        assertAllocatedSpaceEquals(cat5, file2Actual);
+
+        CreateFileRequest createCat4 = createFileRequest(readCat4());
+        operations.createFile(createCat4);
+
+        operations.deleteFile(createCat5.getFilename());
+
+        operations.updateFile(UpdateFileRequest.builder()
+                .content(readJbFile())
+                .filename(createCat4.getFilename())
+                .build());
+
+        BlockAllocatedSpace file3Actual = BlockAllocatedSpace.of(operations.readFile(createCat4.getFilename()));
+        assertAllocatedSpaceEquals(jb, file3Actual);
     }
 }

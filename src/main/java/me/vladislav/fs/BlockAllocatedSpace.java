@@ -2,7 +2,9 @@ package me.vladislav.fs;
 
 import jakarta.annotation.Nonnull;
 import lombok.Getter;
+import me.vladislav.fs.util.ByteBufferUtils;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -13,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * Allows you to work with the allocated space in a per block manner
  */
-public class BlockAllocatedSpace {
+public class BlockAllocatedSpace implements Closeable {
 
     /**
      * Number of available blocks
@@ -34,10 +36,10 @@ public class BlockAllocatedSpace {
     public BlockAllocatedSpace(
             @Nonnull BlockSize blockSize,
             @Nonnull AllocatedSpace allocatedSpace
-    ) throws IOException {
+    ) {
         this.blockSize = blockSize;
         this.allocatedSpace = allocatedSpace;
-        blocksAmount = (int) (allocatedSpace.size() / blockSize.getBlockSizeInBytes());
+        blocksAmount = (int) Math.ceil((double) allocatedSpace.size() / blockSize.getBlockSizeInBytes());
     }
 
     public static BlockAllocatedSpace of(SeekableByteChannel channel) throws IOException {
@@ -51,7 +53,7 @@ public class BlockAllocatedSpace {
     public Iterator<ByteBuffer> contentIterator() {
         return Stream.iterate(
                 readBlock(),
-                buffer -> hasNextBlock(),
+                buffer -> hasNextBlock() || !ByteBufferUtils.isEmpty(buffer),
                 buffer -> readBlock()
         ).iterator();
     }
@@ -107,5 +109,10 @@ public class BlockAllocatedSpace {
 
     private int blockStart(int blockIndex) {
         return blockIndex * blockSize.getBlockSizeInBytes();
+    }
+
+    @Override
+    public void close() throws IOException {
+        allocatedSpace.close();
     }
 }

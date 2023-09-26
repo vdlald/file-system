@@ -30,6 +30,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 
     implementation("com.google.guava:guava:32.1.2-jre")
     implementation("net.sf.trove4j:trove4j:3.0.3")

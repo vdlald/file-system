@@ -25,15 +25,15 @@ import java.util.UUID;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class AbstractFileSystemTest {
 
     public static final int KB_2 = 1024 * 2;
     public static final int KB_8 = 1024 * 8;
-    public static final int MB_8 = 1048576 * 8;
+    public static final int MB_1 = 1048576;
+    public static final int MB_8 = MB_1 * 8;
 
     @Autowired
     protected OpenFileSystemOperation openFileSystemOperation;
@@ -65,7 +65,7 @@ public class AbstractFileSystemTest {
         return CreateFileSystemRequest.builder()
                 .whereToStore(tempDirectory)
                 .fileSystemName("fs_" + UUID.randomUUID())
-                .initialSizeInBytes(MB_8)
+                .initialSizeInBytes(MB_1)
                 .build();
     }
 
@@ -96,6 +96,37 @@ public class AbstractFileSystemTest {
 
     protected void assertIsNotEmpty(ByteBuffer buffer) {
         assertFalse(ByteBufferUtils.isEmpty(buffer));
+    }
+
+    protected void assertAllocatedSpaceEquals(BlockAllocatedSpace expected, BlockAllocatedSpace actual) {
+        assertEquals(expected.blocksAmount, actual.blocksAmount);
+        while (expected.hasNextBlock()) {
+            ByteBuffer e = expected.readBlock();
+            ByteBuffer a = actual.readBlock();
+            assertEquals(e, a,
+                    () -> "expected: %s\nactual: %s".formatted(
+                            ByteBufferUtils.readToString(e), ByteBufferUtils.readToString(a)));
+        }
+    }
+
+    protected SeekableByteChannel readCat1() throws IOException {
+        return readFile("/files/cat1.webp");
+    }
+
+    protected SeekableByteChannel readCat2() throws IOException {
+        return readFile("/files/cat2.webp");
+    }
+
+    protected SeekableByteChannel readCat3() throws IOException {
+        return readFile("/files/cat3.jpeg");
+    }
+
+    protected SeekableByteChannel readCat4() throws IOException {
+        return readFile("/files/cat4.webp");
+    }
+
+    protected SeekableByteChannel readCat5() throws IOException {
+        return readFile("/files/cat5.jpg");
     }
 
     protected SeekableByteChannel readCvFile() throws IOException {
