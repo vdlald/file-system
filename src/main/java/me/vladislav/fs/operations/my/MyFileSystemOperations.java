@@ -15,7 +15,6 @@ import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlock;
 import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlockFactory;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlock;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlockFactory;
-import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.operations.FileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
@@ -41,19 +40,16 @@ public class MyFileSystemOperations implements FileSystemOperations {
     @Nonnull
     @Getter(onMethod = @__(@VisibleForTesting))
     private final IndexedBlockAllocatedSpace allocatedSpace;
-    private final FileContentIndexBlockBytesSerializer indexBlockSerializer;
     private final ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory;
     private final ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory;
 
     @SuppressWarnings("all")
     public MyFileSystemOperations(
             IndexedBlockAllocatedSpace allocatedSpace,
-            FileContentIndexBlockBytesSerializer indexBlockSerializer,
             ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory,
             ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory
     ) {
         this.allocatedSpace = allocatedSpace;
-        this.indexBlockSerializer = indexBlockSerializer;
         this.chainedFileDescriptorsBlockFactory = chainedFileDescriptorsBlockFactory;
         this.chainedFileContentIndexBlockFactory = chainedFileContentIndexBlockFactory;
     }
@@ -121,18 +117,10 @@ public class MyFileSystemOperations implements FileSystemOperations {
             throw new FileNotFoundException(filename);
         }
 
-        FileContentIndexBlock indexBlock;
-        int indexBlockIndex = fileDescriptor.getFileBlockIndex();
-        do {
-            ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
-            indexBlock = indexBlockSerializer.from(indexBlockBuffer);
+        ChainedFileContentIndexBlock contentChain = chainedFileContentIndexBlockFactory.create(
+                fileDescriptor.getFileBlockIndex(), allocatedSpace);
 
-            for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
-                ByteBuffer buffer = allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i));
-                channel.write(buffer);
-            }
-            indexBlockIndex = indexBlock.getNextIndexBlock();
-        } while (indexBlock.containsNextBlock());
+        contentChain.readAllBlocks(channel);
         return channel.position(0);
     }
 
@@ -154,17 +142,13 @@ public class MyFileSystemOperations implements FileSystemOperations {
                 .build());
 
         log.debug("get file index block");
-        int indexBlockIndex = fileDescriptor.getFileBlockIndex();
-        ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
-        FileContentIndexBlock indexBlock = indexBlockSerializer.from(indexBlockBuffer);
-
-        ChainedFileContentIndexBlock indexChain = chainedFileContentIndexBlockFactory.create(
-                fileDescriptor.getFileBlockIndex(), indexBlock, allocatedSpace);
+        ChainedFileContentIndexBlock contentChain = chainedFileContentIndexBlockFactory.create(
+                fileDescriptor.getFileBlockIndex(), allocatedSpace);
 
         log.debug("update file content");
         Iterator<ByteBuffer> contentIterator = content.contentIterator();
-        indexChain.rewriteBlocks(contentIterator);
-        indexChain.close();
+        contentChain.rewriteBlocks(contentIterator);
+        contentChain.close();
     }
 
     @Override

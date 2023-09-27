@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.util.Iterator;
 
 /**
@@ -55,6 +56,22 @@ public class ChainedFileContentIndexBlock implements Closeable {
 
         currentBlock = firstBlock;
         currentBlockIndex = firstBlockIndex;
+    }
+
+    public void readAllBlocks(SeekableByteChannel channel) throws IOException {
+        resetToFirstBlock();
+
+        while (true) {
+            for (int blockPointer : currentBlock.getBlockPointers()) {
+                ByteBuffer buffer = allocatedSpace.readBlock(blockPointer);
+                channel.write(buffer);
+            }
+            if (currentBlock.hasNextBlock()) {
+                nextIndexBlock();
+            } else {
+                break;
+            }
+        }
     }
 
     public void appendBlock(@Nonnull ByteBuffer data) throws IOException {

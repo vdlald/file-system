@@ -28,9 +28,7 @@ public class ChainedFileDescriptorsBlockFactory {
         log.debug("create chain for: {}", firstBlockIndex);
         ByteBuffer buffer = allocatedSpace.readBlock(firstBlockIndex);
         FileDescriptorsBlock fileDescriptorsBlock = descriptorsBlockSerializer.from(buffer);
-        return objectProvider.getObject(
-                firstBlockIndex, fileDescriptorsBlock, allocatedSpace, descriptorsBlockSerializer
-        );
+        return create(firstBlockIndex, fileDescriptorsBlock, allocatedSpace);
     }
 
     @Nonnull

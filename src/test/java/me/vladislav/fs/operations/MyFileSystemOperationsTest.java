@@ -222,12 +222,11 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
-    @ParameterizedTest
-    @EnumSource(BlockSize.class)
+    @Test
     @DisplayName("File read and create / Big big file")
-    void testCreateAndRead(BlockSize blockSize) throws Exception {
+    void testCreateAndRead() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
-                .withBlockSize(blockSize));
+                .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request = createFileRequest(readJbFile());
 

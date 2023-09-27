@@ -52,7 +52,7 @@ public class FileContentIndexBlock {
         return blockPointers.size() >= MAX_BLOCK_POINTERS;
     }
 
-    public boolean containsNextBlock() {
+    public boolean hasNextBlock() {
         return nextIndexBlock > 0;
     }
 }
