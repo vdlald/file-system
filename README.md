@@ -44,8 +44,6 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-5. Reading blocks
 [x] T-6. Write data in block
 [x] T-9. Refactor file system creation
-[-] T-8. Index of free blocks
-[-] T-7. Write data in blocks
 [x] T-12. Writing data - Serializing File descriptors
 [x] T-10. Writing data - Write file descriptor in descriptors block
 [x] T-13. Refactor entire project
@@ -65,14 +63,13 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-22. Write more documentation
 [x] T-25. Extract ChainedFileDescriptorsBlock from MyFileSystemOperations
 [x] T-26. Refactor MyFileSystemOperations
-[ ] T-20. Work with different block sizes
 [ ] T-23. Wrap it in console app
 [ ] T-24. Check speed of RW-operations
 
 [ ] P-2. FS initial max size is only 2GB
-[-] P-3. The initial metadata size should not be in the initial metadata size
 [ ] P-5. readBlocks can not allocate more than Integer.MAX bytes
 [ ] P-6. Primitive collections are not used
+[ ] T-20. Work with different block sizes
 
 [ ] FR-1. Compress data
 [ ] FR-2. Encrypt data
