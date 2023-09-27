@@ -95,7 +95,7 @@ public class BlockAllocatedSpace implements Closeable {
     }
 
     public boolean hasNextBlock() {
-        return !allocatedSpace.isCurrentPositionMoreOrEqualsSizeOfChannel();
+        return !allocatedSpace.isOutsideOfSpace();
     }
 
     public BlockAllocatedSpace block(int blockIndex) throws IOException {

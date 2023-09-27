@@ -3,7 +3,6 @@ package me.vladislav.fs;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import lombok.Builder;
-import lombok.With;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -12,14 +11,13 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Represents an allocated space somewhere
+ * Represents an allocated space in channel
  */
 public class AllocatedSpace implements Closeable {
 
     /**
      * Reserved space at the beginning of data
      */
-    @With
     private final long startOffset;
 
     /**
@@ -107,7 +105,10 @@ public class AllocatedSpace implements Closeable {
         return this;
     }
 
-    public boolean isCurrentPositionMoreOrEqualsSizeOfChannel() {
+    /**
+     * Checks if the position in the channel is outside the channel boundary
+     */
+    public boolean isOutsideOfSpace() {
         try {
             return data.position() >= data.size();
         } catch (IOException e) {
@@ -121,5 +122,9 @@ public class AllocatedSpace implements Closeable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public AllocatedSpace withStartOffset(long startOffset) {
+        return this.startOffset == startOffset ? this : new AllocatedSpace(this.startOffset + startOffset, this.data);
     }
 }

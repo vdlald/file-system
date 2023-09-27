@@ -9,6 +9,9 @@ import java.util.BitSet;
 import java.util.PrimitiveIterator;
 import java.util.stream.IntStream;
 
+/**
+ * Allows you to work with allocated space in block mode and maintains an index of the availability of these blocks
+ */
 public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
 
     private final BitSet index;

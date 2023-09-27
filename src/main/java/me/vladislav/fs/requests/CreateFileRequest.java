@@ -8,7 +8,6 @@ import lombok.With;
 import java.nio.channels.SeekableByteChannel;
 
 // todo: можно менять контент из вне
-// todo: Q-5 ?
 @With
 @Getter
 @Builder(toBuilder = true)

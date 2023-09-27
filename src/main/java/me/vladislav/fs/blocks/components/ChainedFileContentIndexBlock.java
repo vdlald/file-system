@@ -14,6 +14,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 
+/**
+ * Represents linked index blocks of a file's content
+ * Encapsulates the handling of index blocks when writing data
+ */
 @Slf4j
 @Component
 @Scope("prototype")

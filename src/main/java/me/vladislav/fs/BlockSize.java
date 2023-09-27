@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Represents different sizes of a single block in the file system
+ */
 @AllArgsConstructor
 public enum BlockSize {
     BYTES_128(128), BYTES_512(512), KB_4(4096);
