@@ -45,8 +45,8 @@ public class FileDescriptorsBlock {
         return new ArrayList<>(descriptors);
     }
 
-    public void removeDescriptor(@Nonnull String filename) {
-        descriptors.remove(getDescriptor(filename));
+    public void removeDescriptor(int index) {
+        descriptors.remove(index);
     }
 
     @Nullable
@@ -54,11 +54,14 @@ public class FileDescriptorsBlock {
         return descriptors.get(index);
     }
 
-    @Nullable
-    public FileDescriptor getDescriptor(@Nonnull String filename) {
-        return descriptors.stream()
-                .filter(descriptor -> descriptor.getFilename().equals(filename))
-                .findFirst().orElse(null);
+    public int getDescriptorIndex(@Nonnull String filename) {
+        for (int i = 0; i < descriptors.size(); i++) {
+            if (descriptors.get(i).getFilename().equals(filename)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public boolean isEmpty() {
@@ -69,7 +72,7 @@ public class FileDescriptorsBlock {
         return descriptors.size() == DESCRIPTORS_LIST_MAX_SIZE;
     }
 
-    public boolean containsNextBlock() {
+    public boolean hasNextBlock() {
         return nextFileDescriptorBlock > 0;
     }
 

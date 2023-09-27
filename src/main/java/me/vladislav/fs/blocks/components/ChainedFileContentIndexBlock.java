@@ -17,6 +17,7 @@ import java.util.Iterator;
 /**
  * Represents linked index blocks of a file's content
  * Encapsulates the handling of index blocks when writing data
+ * Allows you to stop thinking about allocating and reading the following blocks
  */
 @Slf4j
 @Component
@@ -118,26 +119,25 @@ public class ChainedFileContentIndexBlock implements Closeable {
     public void resetToFirstBlock() {
         log.debug("reset to first block");
         currentBlock = firstBlock;
+        currentBlockIndex = firstBlockIndex;
     }
 
     private FileContentIndexBlock nextIndexBlock() throws IOException {
-        if (currentBlock.getNextIndexBlock() > 0) {
-            ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currentBlock);
-            allocatedSpace.writeBlock(currentBlockIndex, buffer);
+        ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currentBlock);
+        allocatedSpace.writeBlock(currentBlockIndex, buffer);
 
+        if (currentBlock.getNextIndexBlock() > 0) {
             int nextBlockIndex = currentBlock.getNextIndexBlock();
             ByteBuffer nextBlockBytes = allocatedSpace.readBlock(nextBlockIndex);
+
             currentBlockIndex = nextBlockIndex;
             currentBlock = indexBlockSerializer.from(nextBlockBytes);
         } else {
-            int allocatedBlock = allocatedSpace.getFreeBlockIndex();
+            int allocatedBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
             currentBlock.setNextIndexBlock(allocatedBlock);
-            ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currentBlock);
-            allocatedSpace.writeBlock(currentBlockIndex, buffer);
 
-            FileContentIndexBlock indexBlock = new FileContentIndexBlock();
             currentBlockIndex = allocatedBlock;
-            currentBlock = indexBlock;
+            currentBlock = new FileContentIndexBlock();
         }
         return currentBlock;
     }

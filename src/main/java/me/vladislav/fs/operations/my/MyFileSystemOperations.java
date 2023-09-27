@@ -11,15 +11,14 @@ import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
-import me.vladislav.fs.blocks.FileDescriptorsBlock;
 import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlock;
 import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlockFactory;
+import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlock;
+import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlockFactory;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
-import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.operations.FileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
-import me.vladislav.fs.util.Pair;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Iterator;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -44,19 +42,19 @@ public class MyFileSystemOperations implements FileSystemOperations {
     @Getter(onMethod = @__(@VisibleForTesting))
     private final IndexedBlockAllocatedSpace allocatedSpace;
     private final FileContentIndexBlockBytesSerializer indexBlockSerializer;
-    private final FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer;
+    private final ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory;
     private final ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory;
 
     @SuppressWarnings("all")
     public MyFileSystemOperations(
             IndexedBlockAllocatedSpace allocatedSpace,
             FileContentIndexBlockBytesSerializer indexBlockSerializer,
-            FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer,
+            ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory,
             ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory
     ) {
         this.allocatedSpace = allocatedSpace;
         this.indexBlockSerializer = indexBlockSerializer;
-        this.descriptorsBlockSerializer = descriptorsBlockSerializer;
+        this.chainedFileDescriptorsBlockFactory = chainedFileDescriptorsBlockFactory;
         this.chainedFileContentIndexBlockFactory = chainedFileContentIndexBlockFactory;
     }
 
@@ -70,24 +68,23 @@ public class MyFileSystemOperations implements FileSystemOperations {
         String filename = createFileRequest.getFilename();
         log.info("creating file: {}", filename);
 
-        if (getFileDescriptorsBlock(filename).getFirst() != null) {
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        if (descriptorChain.getFileDescriptor(filename) != null) {
             throw new FileAlreadyExistsException(filename);
         }
+        descriptorChain.resetToFirstBlock();
 
         log.debug("find file descriptor block with free space");
-        var block = getAvailableFileDescriptorsBlock();
-        FileDescriptorsBlock descriptorsBlock = block.first();
-        int blockIndex = block.second();
 
-        log.debug("save file descriptor in block: {}", blockIndex);
         int fileIndexBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
         FileDescriptor fileDescriptor = FileDescriptor.builder()
                 .filename(filename)
                 .fileBlockIndex(fileIndexBlock)
                 .build();
-        descriptorsBlock.addDescriptor(fileDescriptor);
-        ByteBuffer descriptorBytes = descriptorsBlockSerializer.toByteBuffer(descriptorsBlock);
-        allocatedSpace.writeBlock(blockIndex, descriptorBytes);
+        descriptorChain.addFileDescriptor(fileDescriptor);
+        log.debug("save file descriptor in block: {}", descriptorChain.getCurrentBlockIndex());
 
         log.debug("create index block for content");
         FileContentIndexBlock firstIndexBlock = new FileContentIndexBlock();
@@ -115,7 +112,14 @@ public class MyFileSystemOperations implements FileSystemOperations {
     public SeekableByteChannel readFile(@Nonnull String filename) throws IOException {
         log.info("reading file: {}", filename);
         SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
-        FileDescriptor fileDescriptor = getFileDescriptor(filename);
+
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        FileDescriptor fileDescriptor = descriptorChain.getFileDescriptor(filename);
+        if (fileDescriptor == null) {
+            throw new FileNotFoundException(filename);
+        }
 
         FileContentIndexBlock indexBlock;
         int indexBlockIndex = fileDescriptor.getFileBlockIndex();
@@ -134,8 +138,17 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
     @Override
     public void updateFile(@Nonnull UpdateFileRequest updateFileRequest) throws IOException {
-        log.info("updating file: {}", updateFileRequest.getFilename());
-        FileDescriptor fileDescriptor = getFileDescriptor(updateFileRequest.getFilename());
+        String filename = updateFileRequest.getFilename();
+        log.info("updating file: {}", filename);
+
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        FileDescriptor fileDescriptor = descriptorChain.getFileDescriptor(filename);
+        if (fileDescriptor == null) {
+            throw new FileNotFoundException(filename);
+        }
+
         BlockAllocatedSpace content = new BlockAllocatedSpace(allocatedSpace.getBlockSize(), AllocatedSpace.builder()
                 .data(updateFileRequest.getContent())
                 .build());
@@ -157,89 +170,12 @@ public class MyFileSystemOperations implements FileSystemOperations {
     @Override
     public void deleteFile(@Nonnull String filename) throws IOException {
         log.info("deleting file: {}", filename);
-        Pair<FileDescriptorsBlock, Integer> pair = getFileDescriptorsBlock(filename);
-        if (pair.getFirst() == null) {
-            throw new FileNotFoundException();
+
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        if (!descriptorChain.removeFileDescriptor(filename)) {
+            throw new FileNotFoundException(filename);
         }
-        FileDescriptorsBlock fileDescriptorsBlock = pair.first();
-        int fileDescriptorsBlockIndex = pair.second();
-
-        FileDescriptor fileDescriptor = fileDescriptorsBlock.getDescriptor(filename);
-        assert fileDescriptor != null;
-
-        FileContentIndexBlock indexBlock;
-        int indexBlockIndex = fileDescriptor.getFileBlockIndex();
-        do {
-            ByteBuffer indexBlockBuffer = allocatedSpace.readBlock(indexBlockIndex);
-            indexBlock = indexBlockSerializer.from(indexBlockBuffer);
-
-            for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
-                allocatedSpace.fillBlockZeros(indexBlock.getBlockPointers().get(i));
-            }
-            allocatedSpace.fillBlockZeros(indexBlockIndex);
-            indexBlockIndex = indexBlock.getNextIndexBlock();
-        } while (indexBlock.containsNextBlock());
-
-        fileDescriptorsBlock.removeDescriptor(filename);
-        ByteBuffer descriptorsBlockBuffer = descriptorsBlockSerializer.toByteBuffer(fileDescriptorsBlock);
-        allocatedSpace.writeBlock(fileDescriptorsBlockIndex, descriptorsBlockBuffer);
-    }
-
-    @Nonnull
-    private Pair<FileDescriptorsBlock, Integer> getAvailableFileDescriptorsBlock() throws IOException {
-        return getAvailableFileDescriptorsBlock(0);
-    }
-
-    @Nonnull
-    private Pair<FileDescriptorsBlock, Integer> getAvailableFileDescriptorsBlock(int blockIndex) throws IOException {
-        ByteBuffer byteBuffer = allocatedSpace.readBlock(blockIndex);
-        FileDescriptorsBlock block = descriptorsBlockSerializer.from(byteBuffer);
-        if (block.isFull()) {
-            int nextFileDescriptorBlock = block.getNextFileDescriptorBlock();
-            if (nextFileDescriptorBlock == 0) {
-                int freeBlockIndex = allocatedSpace.getFreeBlockIndex();
-
-                block.setNextFileDescriptorBlock(freeBlockIndex);
-                allocatedSpace.writeBlock(
-                        blockIndex, descriptorsBlockSerializer.toByteBuffer(block));
-
-                return Pair.of(new FileDescriptorsBlock(allocatedSpace.getBlockSize()), freeBlockIndex);
-            }
-            return getAvailableFileDescriptorsBlock(nextFileDescriptorBlock);
-        }
-        return Pair.of(block, blockIndex);
-    }
-
-    @Nonnull
-    private FileDescriptor getFileDescriptor(@Nonnull String filename) throws IOException {
-        Pair<FileDescriptorsBlock, Integer> fileDescriptorsBlock = getFileDescriptorsBlock(filename);
-        if (fileDescriptorsBlock.getFirst() == null) {
-            throw new FileNotFoundException();
-        }
-        return fileDescriptorsBlock.first().getDescriptor(filename);
-    }
-
-    @Nonnull
-    private Pair<FileDescriptorsBlock, Integer> getFileDescriptorsBlock(@Nonnull String filename) throws IOException {
-        FileDescriptorsBlock descriptors;
-        Optional<FileDescriptor> descriptor;
-        int nextBlock = 0;
-        do {
-            ByteBuffer byteBuffer = allocatedSpace.readBlock(nextBlock);
-            descriptors = descriptorsBlockSerializer.from(byteBuffer);
-
-            descriptor = descriptors.getDescriptors().stream()
-                    .filter(fileDescriptor -> filename.equals(fileDescriptor.getFilename()))
-                    .findFirst();
-            if (descriptor.isEmpty()) {
-                nextBlock = descriptors.getNextFileDescriptorBlock();
-            }
-        } while (descriptor.isEmpty() && descriptors.containsNextBlock());
-
-        if (descriptor.isEmpty()) {
-            return Pair.of(null, null);
-        }
-
-        return Pair.of(descriptors, nextBlock);
     }
 }

@@ -38,6 +38,7 @@ public interface FileSystemOperations {
     /**
      * Deletes the file
      * Frees the space occupied by the file and its method
+     * If the file is not found, it gives an error {@link java.io.FileNotFoundException}
      */
     void deleteFile(@Nonnull String filename) throws IOException;
 }

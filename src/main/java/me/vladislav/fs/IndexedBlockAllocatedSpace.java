@@ -55,25 +55,17 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
     }
 
     public int getFreeBlockIndex() {
-        for (int i = lastFreeBlockIndex; i < index.size(); i++) {
-            if (isBlockFree(i)) {
-                lastFreeBlockIndex = i;
-                return i;
-            }
+        int freeBlock = index.nextSetBit(lastFreeBlockIndex);
+
+        if (freeBlock == -1) {
+            freeBlock = index.previousSetBit(lastFreeBlockIndex);
         }
 
-        if (index.cardinality() == 0) {
-            return blocksAmount;
+        if (freeBlock == -1) {
+            freeBlock = blocksAmount;
         }
 
-        for (int i = 0; i < lastFreeBlockIndex; i++) {
-            if (isBlockFree(i)) {
-                lastFreeBlockIndex = i;
-                return i;
-            }
-        }
-
-        return -1;
+        return freeBlock;
     }
 
     public boolean isBlockFree(int blockIndex) {

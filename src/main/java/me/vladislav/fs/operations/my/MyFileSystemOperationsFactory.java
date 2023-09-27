@@ -5,8 +5,8 @@ import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlockFactory;
+import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlockFactory;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
-import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ public class MyFileSystemOperationsFactory {
 
     private final ObjectProvider<MyFileSystemOperations> objectProvider;
     private final FileContentIndexBlockBytesSerializer indexBlockBytesSerializer;
-    private final FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
+    private final ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory;
     private final ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory;
 
     @Nonnull
@@ -30,7 +30,7 @@ public class MyFileSystemOperationsFactory {
         return objectProvider.getObject(
                 new IndexedBlockAllocatedSpace(blockSize, allocatedSpace),
                 indexBlockBytesSerializer,
-                fileDescriptorsBlockBytesSerializer,
+                chainedFileDescriptorsBlockFactory,
                 chainedFileContentIndexBlockFactory
         );
     }
