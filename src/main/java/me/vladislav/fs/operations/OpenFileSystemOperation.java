@@ -28,11 +28,17 @@ public class OpenFileSystemOperation {
     private final MyFileSystemOperationsFactory myFileSystemOperationsFactory;
 
     @Nonnull
-    public FileSystem open(@Nonnull Path savePlace) throws IOException {
+    public FileSystem open(@Nonnull Path savePlace) {
         log.info("opening fs");
-        AllocatedSpace allocatedFsSpace = AllocatedSpace.builder()
-                .data(Files.newByteChannel(savePlace, READ))
-                .build();
+
+        AllocatedSpace allocatedFsSpace;
+        try {
+            allocatedFsSpace = AllocatedSpace.builder()
+                    .data(Files.newByteChannel(savePlace, READ))
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         log.info("loading metadata");
         ByteBuffer metadataBytes = allocatedFsSpace.position(0).read(Metadata.TOTAL_SIZE);
@@ -41,10 +47,16 @@ public class OpenFileSystemOperation {
 
         allocatedFsSpace.close();
 
-        AllocatedSpace allocatedFilesSpace = AllocatedSpace.builder()
-                .data(Files.newByteChannel(savePlace, READ, WRITE))
-                .startOffset(Metadata.TOTAL_SIZE)
-                .build();
+        AllocatedSpace allocatedFilesSpace;
+        try {
+            allocatedFilesSpace = AllocatedSpace.builder()
+                    .data(Files.newByteChannel(savePlace, READ, WRITE))
+                    .startOffset(Metadata.TOTAL_SIZE)
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         MyFileSystemOperations fileSystemOperations = myFileSystemOperationsFactory.create(
                 allocatedFilesSpace, metadata.getBlockSize());
         return FileSystem.builder()

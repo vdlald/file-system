@@ -15,6 +15,8 @@ import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlock;
 import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlockFactory;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlock;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlockFactory;
+import me.vladislav.fs.exceptions.FileAlreadyExistsException;
+import me.vladislav.fs.exceptions.FileNotFoundException;
 import me.vladislav.fs.operations.FileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
@@ -22,11 +24,9 @@ import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.Iterator;
 
 @Slf4j
@@ -60,9 +60,17 @@ public class MyFileSystemOperations implements FileSystemOperations {
     }
 
     @Override
-    public void createFile(@Nonnull CreateFileRequest createFileRequest) throws IOException {
+    public void createFile(@Nonnull CreateFileRequest createFileRequest) {
         String filename = createFileRequest.getFilename();
         log.info("creating file: {}", filename);
+
+        try {
+            if (createFileRequest.getContent().size() <= 0) {
+                throw new RuntimeException();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
                 FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
@@ -100,12 +108,16 @@ public class MyFileSystemOperations implements FileSystemOperations {
         }
 
         chainIndex.close();
-        createFileRequest.getContent().close();
+        try {
+            createFileRequest.getContent().close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Nonnull
     @Override
-    public SeekableByteChannel readFile(@Nonnull String filename) throws IOException {
+    public SeekableByteChannel readFile(@Nonnull String filename) {
         log.info("reading file: {}", filename);
         SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
 
@@ -121,11 +133,15 @@ public class MyFileSystemOperations implements FileSystemOperations {
                 fileDescriptor.getFileBlockIndex(), allocatedSpace);
 
         contentChain.readAllBlocks(channel);
-        return channel.position(0);
+        try {
+            return channel.position(0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void updateFile(@Nonnull UpdateFileRequest updateFileRequest) throws IOException {
+    public void updateFile(@Nonnull UpdateFileRequest updateFileRequest) {
         String filename = updateFileRequest.getFilename();
         log.info("updating file: {}", filename);
 
@@ -152,7 +168,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
     }
 
     @Override
-    public void deleteFile(@Nonnull String filename) throws IOException {
+    public void deleteFile(@Nonnull String filename) {
         log.info("deleting file: {}", filename);
 
         ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(

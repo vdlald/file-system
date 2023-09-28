@@ -1,7 +1,7 @@
 package me.vladislav.fs.apis;
 
 import jakarta.annotation.Nonnull;
-import me.vladislav.fs.requests.*;
+import me.vladislav.fs.apis.requests.*;
 
 import java.nio.channels.SeekableByteChannel;
 

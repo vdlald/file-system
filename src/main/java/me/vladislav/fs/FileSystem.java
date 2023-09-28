@@ -8,7 +8,6 @@ import lombok.ToString;
 import me.vladislav.fs.operations.FileSystemOperations;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 
 /**
@@ -46,7 +45,7 @@ public class FileSystem implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         allocatedSpace.close();
     }
 

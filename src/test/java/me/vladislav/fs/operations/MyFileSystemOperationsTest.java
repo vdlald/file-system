@@ -6,6 +6,7 @@ import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
+import me.vladislav.fs.exceptions.FileNotFoundException;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;

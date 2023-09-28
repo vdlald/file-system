@@ -2,11 +2,9 @@ package me.vladislav.fs;
 
 import me.vladislav.fs.util.ByteBufferUtils;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.BitSet;
-import java.util.PrimitiveIterator;
 import java.util.stream.IntStream;
 
 /**
@@ -17,7 +15,7 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
     private final BitSet index;
     private int lastFreeBlockIndex = 0;
 
-    public IndexedBlockAllocatedSpace(BlockSize blockSize, AllocatedSpace allocatedSpace) throws IOException {
+    public IndexedBlockAllocatedSpace(BlockSize blockSize, AllocatedSpace allocatedSpace) {
         super(blockSize, allocatedSpace);
 
         index = new BitSet(blocksAmount);
@@ -30,7 +28,7 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
         }
     }
 
-    public static IndexedBlockAllocatedSpace of(SeekableByteChannel file) throws IOException {
+    public static IndexedBlockAllocatedSpace of(SeekableByteChannel file) {
         AllocatedSpace allocatedSpace = AllocatedSpace.builder()
                 .data(file)
                 .build();
@@ -38,12 +36,12 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
     }
 
     @Override
-    public void writeBlock(int blockIndex, ByteBuffer data) throws IOException {
+    public void writeBlock(int blockIndex, ByteBuffer data) {
         index.set(blockIndex, ByteBufferUtils.isEmpty(data));
         super.writeBlock(blockIndex, data);
     }
 
-    public void fillBlockZeros(int blockIndex) throws IOException {
+    public void fillBlockZeros(int blockIndex) {
         index.set(blockIndex, true);
         super.fillBlockZeros(blockIndex);
     }
@@ -74,10 +72,6 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
 
     public void markBlockAsAllocated(int blockIndex) {
         index.set(blockIndex, false);
-    }
-
-    public PrimitiveIterator.OfInt getFreeBlocksIndexIterator() {
-        return getFreeBlocksIndexStream().iterator();
     }
 
     public IntStream getFreeBlocksIndexStream() {

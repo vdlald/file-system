@@ -44,8 +44,12 @@ public class AllocatedSpace implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        data.close();
+    public void close() {
+        try {
+            data.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Nonnull
@@ -55,7 +59,7 @@ public class AllocatedSpace implements Closeable {
     }
 
     @Nonnull
-    public String readInString(int amountOfBytes) throws IOException {
+    public String readInString(int amountOfBytes) {
         ByteBuffer buffer = ByteBuffer.allocate(amountOfBytes);
         read(buffer);
         return new String(buffer.array(), StandardCharsets.UTF_8);
@@ -72,36 +76,57 @@ public class AllocatedSpace implements Closeable {
         }
     }
 
-    public int read(@Nonnull ByteBuffer dst) throws IOException {
-        int read = data.read(dst);
+    public int read(@Nonnull ByteBuffer dst) {
+        int read = 0;
+        try {
+            read = data.read(dst);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         dst.rewind();
         return read;
     }
 
-    public int writeString(@Nonnull String str) throws IOException {
+    public int writeString(@Nonnull String str) {
         ByteBuffer allocate = ByteBuffer.allocate(str.length())
                 .put(str.getBytes(StandardCharsets.UTF_8))
                 .rewind();
-        return data.write(allocate);
+        try {
+            return data.write(allocate);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public int write(@Nonnull ByteBuffer src) throws IOException {
-        return data.write(src);
+    public int write(@Nonnull ByteBuffer src) {
+        try {
+            return data.write(src);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public long position() throws IOException {
-        return data.position() - startOffset;
+    public long position() {
+        try {
+            return data.position() - startOffset;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Nonnull
-    public AllocatedSpace position(long newPosition) throws IOException {
+    public AllocatedSpace position(long newPosition) {
         long actualPosition = startOffset + newPosition;
         if (actualPosition < startOffset) {
             throw new IndexOutOfBoundsException(
                     "startOffset: %s, actualPosition: %s".formatted(startOffset, actualPosition)
             );
         }
-        data.position(actualPosition);
+        try {
+            data.position(actualPosition);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 

@@ -11,7 +11,6 @@ import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -49,7 +48,7 @@ public class ChainedFileDescriptorsBlock {
         currentBlockIndex = firstBlockIndex;
     }
 
-    public void addFileDescriptor(@Nonnull FileDescriptor fileDescriptor) throws IOException {
+    public void addFileDescriptor(@Nonnull FileDescriptor fileDescriptor) {
         while (!currentBlock.addDescriptor(fileDescriptor)) {
             nextBlock();
         }
@@ -59,7 +58,7 @@ public class ChainedFileDescriptorsBlock {
     }
 
     @Nullable
-    public FileDescriptor getFileDescriptor(@Nonnull String filename) throws IOException {
+    public FileDescriptor getFileDescriptor(@Nonnull String filename) {
         resetToFirstBlock();
 
         int descriptorIndex;
@@ -79,7 +78,7 @@ public class ChainedFileDescriptorsBlock {
         return currentBlock.getDescriptors().get(descriptorIndex);
     }
 
-    public boolean removeFileDescriptor(@Nonnull String filename) throws IOException {
+    public boolean removeFileDescriptor(@Nonnull String filename) {
         resetToFirstBlock();
 
         int descriptorIndex;
@@ -101,13 +100,13 @@ public class ChainedFileDescriptorsBlock {
         return true;
     }
 
-    public void resetToFirstBlock() throws IOException {
+    public void resetToFirstBlock() {
         log.debug("reset to first block");
         currentBlock = descriptorsBlockSerializer.from(allocatedSpace.readBlock(firstBlockIndex));
         currentBlockIndex = firstBlockIndex;
     }
 
-    private void nextBlock() throws IOException {
+    private void nextBlock() {
         ByteBuffer buffer = descriptorsBlockSerializer.toByteBuffer(currentBlock);
         allocatedSpace.writeBlock(currentBlockIndex, buffer);
 

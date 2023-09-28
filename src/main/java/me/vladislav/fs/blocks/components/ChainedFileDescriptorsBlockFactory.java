@@ -9,7 +9,6 @@ import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @Slf4j
@@ -24,7 +23,7 @@ public class ChainedFileDescriptorsBlockFactory {
     public ChainedFileDescriptorsBlock create(
             int firstBlockIndex,
             @Nonnull IndexedBlockAllocatedSpace allocatedSpace
-    ) throws IOException {
+    ) {
         log.debug("create chain for: {}", firstBlockIndex);
         ByteBuffer buffer = allocatedSpace.readBlock(firstBlockIndex);
         FileDescriptorsBlock fileDescriptorsBlock = descriptorsBlockSerializer.from(buffer);

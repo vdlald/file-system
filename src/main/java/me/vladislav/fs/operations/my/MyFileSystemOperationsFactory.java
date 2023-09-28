@@ -10,7 +10,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class MyFileSystemOperationsFactory {
     public MyFileSystemOperations create(
             @Nonnull AllocatedSpace allocatedSpace,
             @Nonnull BlockSize blockSize
-    ) throws IOException {
+    ) {
         return objectProvider.getObject(
                 new IndexedBlockAllocatedSpace(blockSize, allocatedSpace),
                 chainedFileDescriptorsBlockFactory,

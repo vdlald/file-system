@@ -6,14 +6,16 @@ import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.apis.ApplicationApi;
 import me.vladislav.fs.apis.JavaApi;
-import me.vladislav.fs.requests.*;
+import me.vladislav.fs.apis.requests.*;
 import me.vladislav.fs.util.ResourceUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -31,7 +33,7 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
     private final ArgumentsParserFactory argumentsParserFactory;
 
     @Override
-    public void run(ApplicationArguments rawArgs) throws Exception {
+    public void run(ApplicationArguments rawArgs) {
         ArgumentsParser arguments = argumentsParserFactory.create(rawArgs);
         String operation = arguments.operation();
         if (operation == null) {
@@ -39,9 +41,7 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
         }
 
         switch (operation) {
-            case HELP -> {
-                System.out.println(ResourceUtils.getResourceAsString("/arguments_help.md"));
-            }
+            case HELP -> System.out.println(ResourceUtils.getResourceAsString("/arguments_help.md"));
             case OPERATION_CREATE_FS -> {
                 var request = CreateFileSystemRequest.builder()
                         .whereToStore(arguments.fileSystemPath())
@@ -52,51 +52,46 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
                 }
                 createFileSystem(request.build());
             }
-            case OPERATION_CREATE_FILE -> {
-                createFile(
-                        CreateFileRequest.builder()
-                                .filename(arguments.filename())
-                                .content(arguments.fileIn())
-                                .build()
-                );
-            }
+            case OPERATION_CREATE_FILE -> createFile(
+                    CreateFileRequest.builder()
+                            .filename(arguments.filename())
+                            .content(arguments.fileIn())
+                            .fsPath(arguments.fileSystemPath())
+                            .build()
+            );
             case OPERATION_READ_FILE -> {
                 SeekableByteChannel file = readFile(
                         ReadFileRequest.builder()
                                 .filename(arguments.filename())
+                                .fsPath(arguments.fileSystemPath())
                                 .build()
                 );
                 dumpToSystemOut(file);
             }
-            case OPERATION_UPDATE_FILE -> {
-                updateFile(
-                        UpdateFileRequest.builder()
-                                .filename(arguments.filename())
-                                .content(arguments.fileIn())
-                                .build()
-                );
-            }
-            case OPERATION_DELETE_FILE -> {
-                deleteFile(
-                        DeleteFileRequest.builder()
-                                .filename(arguments.filename())
-                                .build()
-                );
-            }
-            default -> {
-                throw new RuntimeException();
-            }
+            case OPERATION_UPDATE_FILE -> updateFile(
+                    UpdateFileRequest.builder()
+                            .filename(arguments.filename())
+                            .content(arguments.fileIn())
+                            .fsPath(arguments.fileSystemPath())
+                            .build()
+            );
+            case OPERATION_DELETE_FILE -> deleteFile(
+                    DeleteFileRequest.builder()
+                            .filename(arguments.filename())
+                            .fsPath(arguments.fileSystemPath())
+                            .build()
+            );
+            default -> throw new RuntimeException();
         }
     }
 
     private void dumpToSystemOut(SeekableByteChannel channel) {
-        try {
-            BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(channel);
-            while (allocatedSpace.hasNextBlock()) {
-                System.out.print(allocatedSpace.readBlock());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(channel);
+        while (allocatedSpace.hasNextBlock()) {
+            ByteBuffer obj = allocatedSpace.readBlock();
+            System.out.println(Arrays.toString(obj.array()));
+            String content = new String(obj.array(), StandardCharsets.UTF_8);
+            System.out.println(content);
         }
     }
 

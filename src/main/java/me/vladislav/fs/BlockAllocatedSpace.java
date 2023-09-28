@@ -5,7 +5,6 @@ import lombok.Getter;
 import me.vladislav.fs.util.ByteBufferUtils;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Iterator;
@@ -42,7 +41,7 @@ public class BlockAllocatedSpace implements Closeable {
         blocksAmount = (int) Math.ceil((double) allocatedSpace.size() / blockSize.getBlockSizeInBytes());
     }
 
-    public static BlockAllocatedSpace of(SeekableByteChannel channel) throws IOException {
+    public static BlockAllocatedSpace of(SeekableByteChannel channel) {
         AllocatedSpace allocatedSpace = AllocatedSpace.builder()
                 .data(channel)
                 .build();
@@ -59,14 +58,14 @@ public class BlockAllocatedSpace implements Closeable {
     }
 
     @Nonnull
-    public ByteBuffer readBlock(int blockIndex) throws IOException {
+    public ByteBuffer readBlock(int blockIndex) {
         return allocatedSpace.position(blockStart(blockIndex))
                 .read(blockSize.getBlockSizeInBytes());
     }
 
     @Nonnull
-    public ByteBuffer readBlocks(List<Integer> blockIndexes) throws IOException {
-        ByteBuffer allocate = ByteBuffer.allocate(blockIndexes.size() * blockSize.getBlockSizeInBytes()); //
+    public ByteBuffer readBlocks(List<Integer> blockIndexes) {
+        ByteBuffer allocate = ByteBuffer.allocate(blockIndexes.size() * blockSize.getBlockSizeInBytes());
         for (Integer blockIndex : blockIndexes) {
             allocate.put(readBlock(blockIndex));
         }
@@ -77,11 +76,11 @@ public class BlockAllocatedSpace implements Closeable {
         return allocatedSpace.read(blockSize.getBlockSizeInBytes());
     }
 
-    protected void fillBlockZeros(int blockIndex) throws IOException {
+    protected void fillBlockZeros(int blockIndex) {
         writeBlock(blockIndex, ByteBuffer.allocate(blockSize.getBlockSizeInBytes()));
     }
 
-    public void writeBlock(int blockIndex, @Nonnull ByteBuffer data) throws IOException {
+    public void writeBlock(int blockIndex, @Nonnull ByteBuffer data) {
         if (data.array().length > blockSize.getBlockSizeInBytes()) {
             throw new RuntimeException();
         }
@@ -98,12 +97,12 @@ public class BlockAllocatedSpace implements Closeable {
         return !allocatedSpace.isOutsideOfSpace();
     }
 
-    public BlockAllocatedSpace block(int blockIndex) throws IOException {
+    public BlockAllocatedSpace block(int blockIndex) {
         allocatedSpace.position(blockStart(blockIndex));
         return this;
     }
 
-    public long size() throws IOException {
+    public long size() {
         return allocatedSpace.size();
     }
 
@@ -112,7 +111,7 @@ public class BlockAllocatedSpace implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         allocatedSpace.close();
     }
 }

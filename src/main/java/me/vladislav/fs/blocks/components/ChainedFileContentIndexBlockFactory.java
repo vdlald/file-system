@@ -9,7 +9,6 @@ import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 @Slf4j
@@ -24,7 +23,7 @@ public class ChainedFileContentIndexBlockFactory {
     public ChainedFileContentIndexBlock create(
             int firstBlockIndex,
             @Nonnull IndexedBlockAllocatedSpace allocatedSpace
-    ) throws IOException {
+    ) {
         log.debug("create chain for: {}", firstBlockIndex);
         ByteBuffer buffer = allocatedSpace.readBlock(firstBlockIndex);
         FileContentIndexBlock firstBlock = indexBlockSerializer.from(buffer);

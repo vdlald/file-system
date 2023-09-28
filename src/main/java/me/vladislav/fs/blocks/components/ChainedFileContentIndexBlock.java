@@ -3,6 +3,7 @@ package me.vladislav.fs.blocks.components;
 import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Iterator;
@@ -58,13 +58,14 @@ public class ChainedFileContentIndexBlock implements Closeable {
         currentBlockIndex = firstBlockIndex;
     }
 
-    public void readAllBlocks(SeekableByteChannel channel) throws IOException {
+    public void readAllBlocks(SeekableByteChannel channel) {
         resetToFirstBlock();
+        AllocatedSpace outSpace = AllocatedSpace.builder().data(channel).build();
 
         while (true) {
             for (int blockPointer : currentBlock.getBlockPointers()) {
                 ByteBuffer buffer = allocatedSpace.readBlock(blockPointer);
-                channel.write(buffer);
+                outSpace.write(buffer);
             }
             if (currentBlock.hasNextBlock()) {
                 nextIndexBlock();
@@ -74,7 +75,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
         }
     }
 
-    public void appendBlock(@Nonnull ByteBuffer data) throws IOException {
+    public void appendBlock(@Nonnull ByteBuffer data) {
         if (data.remaining() > allocatedSpace.getBlockSize().getBlockSizeInBytes()) {
             throw new RuntimeException();
         }
@@ -87,7 +88,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
         allocatedSpace.writeBlock(freeBlock, data);
     }
 
-    public void rewriteBlocks(@Nonnull Iterator<ByteBuffer> blocks) throws IOException {
+    public void rewriteBlocks(@Nonnull Iterator<ByteBuffer> blocks) {
         resetToFirstBlock();
 
         int i = 0;
@@ -139,7 +140,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
         currentBlockIndex = firstBlockIndex;
     }
 
-    private FileContentIndexBlock nextIndexBlock() throws IOException {
+    private FileContentIndexBlock nextIndexBlock() {
         ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currentBlock);
         allocatedSpace.writeBlock(currentBlockIndex, buffer);
 
@@ -160,7 +161,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         allocatedSpace.writeBlock(firstBlockIndex, indexBlockSerializer.toByteBuffer(firstBlock));
         allocatedSpace.writeBlock(currentBlockIndex, indexBlockSerializer.toByteBuffer(currentBlock));
     }

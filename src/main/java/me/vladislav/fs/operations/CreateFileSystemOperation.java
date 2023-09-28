@@ -28,7 +28,7 @@ public class CreateFileSystemOperation {
     private final FileSystemMetadataBytesSerializer metadataBytesSerializer;
 
     @Nonnull
-    public FileSystem createFileSystem(@Nonnull CreateFileSystemRequest request) throws IOException {
+    public FileSystem createFileSystem(@Nonnull CreateFileSystemRequest request) {
         Path savePlace = request.getWhereToStore();
         if (Files.isDirectory(savePlace)) {
             throw new IllegalArgumentException("You need to specify where to save the file system");
@@ -36,20 +36,24 @@ public class CreateFileSystemOperation {
 
         log.info("creating new FS: {}", savePlace);
 
-        SeekableByteChannel channel = Files.newByteChannel(savePlace, CREATE_NEW, WRITE);
-        channel.write(ByteBuffer.allocate(request.getInitialSizeInBytes()));
+        try {
+            SeekableByteChannel channel = Files.newByteChannel(savePlace, CREATE_NEW, WRITE);
+            channel.write(ByteBuffer.allocate(request.getInitialSizeInBytes()));
 
-        log.debug("saving fs metadata");
-        ByteBuffer metadataBytes = metadataBytesSerializer.toByteBuffer(FileSystem.Metadata.builder()
-                .createdAt(ZonedDateTime.now())
-                .blockSize(request.getBlockSize())
-                .fileAllocationMethod(METHOD_NAME)
-                .build());
-        channel.position(0)
-                .write(metadataBytes);
+            log.debug("saving fs metadata");
+            ByteBuffer metadataBytes = metadataBytesSerializer.toByteBuffer(FileSystem.Metadata.builder()
+                    .createdAt(ZonedDateTime.now())
+                    .blockSize(request.getBlockSize())
+                    .fileAllocationMethod(METHOD_NAME)
+                    .build());
+            channel.position(0)
+                    .write(metadataBytes);
 
-        channel.close();
+            channel.close();
 
-        return openFileSystemOperation.open(savePlace);
+            return openFileSystemOperation.open(savePlace);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
