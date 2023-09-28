@@ -20,13 +20,6 @@ public class CreateFileSystemRequest {
     private final Path whereToStore;
 
     /**
-     * How to name a file system
-     */
-    @Nonnull
-    @Builder.Default
-    private final String fileSystemName = "filesystem";
-
-    /**
      * How much space to allocate to the file system beforehand
      */
     @Builder.Default

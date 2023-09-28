@@ -25,8 +25,7 @@ public class CreateFileSystemOperationTest extends AbstractFileSystemTest {
     void testCreateFileSystemFile(int size) throws IOException {
         String fsName = "test file system" + UUID.randomUUID();
         CreateFileSystemRequest request = CreateFileSystemRequest.builder()
-                .whereToStore(tempDirectory)
-                .fileSystemName(fsName)
+                .whereToStore(tempDirectory.resolve(fsName))
                 .initialSizeInBytes(size)
                 .build();
 

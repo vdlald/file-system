@@ -29,7 +29,10 @@ public class CreateFileSystemOperation {
 
     @Nonnull
     public FileSystem createFileSystem(@Nonnull CreateFileSystemRequest request) throws IOException {
-        Path savePlace = request.getWhereToStore().resolve(request.getFileSystemName());
+        Path savePlace = request.getWhereToStore();
+        if (Files.isDirectory(savePlace)) {
+            throw new IllegalArgumentException("You need to specify where to save the file system");
+        }
 
         log.info("creating new FS: {}", savePlace);
 

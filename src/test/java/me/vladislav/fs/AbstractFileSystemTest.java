@@ -63,8 +63,7 @@ public class AbstractFileSystemTest {
     @Nonnull
     protected CreateFileSystemRequest getCreateFileSystemRequest() {
         return CreateFileSystemRequest.builder()
-                .whereToStore(tempDirectory)
-                .fileSystemName("fs_" + UUID.randomUUID())
+                .whereToStore(tempDirectory.resolve("fs_" + UUID.randomUUID()))
                 .initialSizeInBytes(MB_1)
                 .build();
     }

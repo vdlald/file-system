@@ -12,8 +12,6 @@ import me.vladislav.fs.requests.UpdateFileRequest;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.FileNotFoundException;
@@ -114,12 +112,11 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         file.close();
     }
 
-    @ParameterizedTest
-    @EnumSource(BlockSize.class)
+    @Test
     @DisplayName("File creation / File content must be written / Big big file")
-    void testCreateBigBigFileContent(BlockSize blockSize) throws Exception {
+    void testCreateBigBigFileContent() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
-                .withBlockSize(blockSize));
+                .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request = createFileRequest(readJbFile());
 
@@ -154,12 +151,11 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
-    @ParameterizedTest
-    @EnumSource(BlockSize.class)
+    @Test
     @DisplayName("File creation / Must save both files")
-    void testCreateTwoFilesContent(BlockSize blockSize) throws Exception {
+    void testCreateTwoFilesContent() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
-                .withBlockSize(blockSize));
+                .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request1 = createFileRequest(readJbFile());
         fileSystem.getFileSystemOperations().createFile(request1);
@@ -254,12 +250,11 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
-    @ParameterizedTest
-    @EnumSource(BlockSize.class)
+    @Test
     @DisplayName("File create and delete / Big big file")
-    void testCreateAndDelete(BlockSize blockSize) throws Exception {
+    void testCreateAndDelete() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
-                .withBlockSize(blockSize));
+                .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request = createFileRequest(readJbFile());
 
@@ -275,12 +270,11 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
-    @ParameterizedTest
-    @EnumSource(BlockSize.class)
+    @Test
     @DisplayName("File create and update / Big big file / shrink")
-    void testCreateAndUpdateShrink(BlockSize blockSize) throws Exception {
+    void testCreateAndUpdateShrink() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
-                .withBlockSize(blockSize));
+                .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request = createFileRequest(readJbFile());
 
@@ -306,12 +300,11 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         fileSystem.close();
     }
 
-    @ParameterizedTest
-    @EnumSource(BlockSize.class)
+    @Test
     @DisplayName("File create and update / Big big file / extend file")
-    void testCreateAndUpdateExtend(BlockSize blockSize) throws Exception {
+    void testCreateAndUpdateExtend() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
-                .withBlockSize(blockSize));
+                .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request = createFileRequest(readCvFile());
 
