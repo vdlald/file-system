@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.FileSystem;
+import me.vladislav.fs.exceptions.CreateFileSystemException;
 import me.vladislav.fs.operations.CreateFileSystemOperation;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
@@ -56,7 +57,7 @@ public class CreateFileSystemOperationImpl implements CreateFileSystemOperation 
 
             return openFileSystemOperation.open(savePlace);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CreateFileSystemException(e);
         }
     }
 }

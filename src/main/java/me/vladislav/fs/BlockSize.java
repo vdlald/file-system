@@ -25,6 +25,6 @@ public enum BlockSize {
         if (map.containsKey(blockSize)) {
             return map.get(blockSize);
         }
-        throw new RuntimeException();
+        throw new IllegalArgumentException("unknown block size %s".formatted(blockSize));
     }
 }

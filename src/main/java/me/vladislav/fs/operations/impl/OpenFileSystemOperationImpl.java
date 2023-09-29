@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.FileSystem;
 import me.vladislav.fs.FileSystem.Metadata;
+import me.vladislav.fs.exceptions.OpenFileSystemException;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import me.vladislav.fs.operations.my.MyFileSystemOperationsFactory;
@@ -39,7 +40,7 @@ public class OpenFileSystemOperationImpl implements OpenFileSystemOperation {
                     .data(Files.newByteChannel(savePlace, READ))
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new OpenFileSystemException(e);
         }
 
         log.info("loading metadata");
@@ -56,7 +57,7 @@ public class OpenFileSystemOperationImpl implements OpenFileSystemOperation {
                     .startOffset(Metadata.TOTAL_SIZE)
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new OpenFileSystemException(e);
         }
 
         MyFileSystemOperations fileSystemOperations = myFileSystemOperationsFactory.create(

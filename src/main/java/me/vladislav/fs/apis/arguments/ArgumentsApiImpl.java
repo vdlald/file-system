@@ -6,6 +6,7 @@ import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.apis.ArgumentsApi;
 import me.vladislav.fs.apis.JavaApi;
+import me.vladislav.fs.apis.UnknownOperationException;
 import me.vladislav.fs.util.ResourceUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Component;
@@ -84,7 +85,7 @@ public class ArgumentsApiImpl implements ArgumentsApi {
             case OPERATION_LIST_FILES -> System.out.println(listFiles(ListFilesRequest.builder()
                     .fsPath(arguments.fileSystemPath())
                     .build()));
-            default -> throw new RuntimeException();
+            default -> throw new UnknownOperationException(operation);
         }
     }
 

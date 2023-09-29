@@ -69,7 +69,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] P-7. block occupancy is not taken into account during expansion
 [x] T-29. Extract interfaces
 [x] T-27. Exception handling in ArgumentsApi
-[ ] T-30. Refactor exceptions
+[x] T-30. Refactor exceptions
 [ ] T-31. Write documentation of the memory organization
 [ ] FR-6. Move the file
 [ ] T-24. Check speed of RW-operations

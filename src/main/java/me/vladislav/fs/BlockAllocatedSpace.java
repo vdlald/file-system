@@ -2,6 +2,7 @@ package me.vladislav.fs;
 
 import jakarta.annotation.Nonnull;
 import lombok.Getter;
+import me.vladislav.fs.exceptions.TooBigBlockException;
 import me.vladislav.fs.util.ByteBufferUtils;
 
 import java.io.Closeable;
@@ -81,8 +82,10 @@ public class BlockAllocatedSpace implements Closeable {
     }
 
     public void writeBlock(int blockIndex, @Nonnull ByteBuffer data) {
-        if (data.array().length > blockSize.getBlockSizeInBytes()) {
-            throw new RuntimeException();
+        int actualSize = data.array().length;
+        int expectedSize = blockSize.getBlockSizeInBytes();
+        if (actualSize > expectedSize) {
+            throw new TooBigBlockException(expectedSize, actualSize);
         }
 
         if (blockIndex + 1 > blocksAmount) {

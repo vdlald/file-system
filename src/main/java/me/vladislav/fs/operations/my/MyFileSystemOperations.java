@@ -75,14 +75,6 @@ public class MyFileSystemOperations implements FileSystemOperations {
         String filename = createFileRequest.getFilename();
         log.info("creating file: {}", filename);
 
-        try {
-            if (createFileRequest.getContent().size() <= 0) {
-                throw new RuntimeException();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
         ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
                 FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
 

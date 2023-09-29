@@ -3,6 +3,8 @@ package me.vladislav.fs.apis.arguments;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
+import me.vladislav.fs.apis.ArgumentsApi.ArgumentsApiException;
+import me.vladislav.fs.exceptions.IsNotFileException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -60,11 +62,11 @@ public class ArgumentsParser {
         try {
             Path in = Path.of(singleRequiredArgument(ARG_FILE_IN));
             if (!Files.isRegularFile(in)) {
-                throw new RuntimeException();
+                throw new IsNotFileException(in);
             }
             return Files.newByteChannel(in, READ);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ArgumentsApiException(e);
         }
     }
 
@@ -78,7 +80,7 @@ public class ArgumentsParser {
         try {
             return Files.newByteChannel(Path.of(out), CREATE, WRITE);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ArgumentsApiException(e);
         }
     }
 
@@ -90,7 +92,7 @@ public class ArgumentsParser {
         }
 
         if (values.size() > 1) {
-            throw new RuntimeException(incorrectArgument(argName, "it's not list argument"));
+            throw new ArgumentValidationException(argName, "it's not list argument");
         }
 
         return values.get(0);
@@ -100,16 +102,18 @@ public class ArgumentsParser {
     private String singleRequiredArgument(String argName) {
         List<String> values = Objects.requireNonNullElse(args.getOptionValues(argName), Collections.emptyList());
         if (values.isEmpty()) {
-            throw new RuntimeException(incorrectArgument(argName, "it's empty"));
+            throw new ArgumentValidationException(argName, "it's empty");
         }
         if (values.size() > 1) {
-            throw new RuntimeException(incorrectArgument(argName, "it's not list argument"));
+            throw new ArgumentValidationException(argName, "it's not list argument");
         }
 
         return values.get(0);
     }
 
-    private String incorrectArgument(String argument, String reason) {
-        return "argument %s incorrect because %s".formatted(argument, reason);
+    public static class ArgumentValidationException extends RuntimeException {
+        public ArgumentValidationException(String argumentName, String reason) {
+            super("argument \"%s\" incorrect because %s".formatted(argumentName, reason));
+        }
     }
 }

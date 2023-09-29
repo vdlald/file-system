@@ -7,6 +7,7 @@ import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
+import me.vladislav.fs.exceptions.TooBigBlockException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -76,8 +77,10 @@ public class ChainedFileContentIndexBlock implements Closeable {
     }
 
     public void appendBlock(@Nonnull ByteBuffer data) {
-        if (data.remaining() > allocatedSpace.getBlockSize().getBlockSizeInBytes()) {
-            throw new RuntimeException();
+        int blockSize = allocatedSpace.getBlockSize().getBlockSizeInBytes();
+        int remaining = data.remaining();
+        if (remaining > blockSize) {
+            throw new TooBigBlockException(blockSize, remaining);
         }
 
         int freeBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
