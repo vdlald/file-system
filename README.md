@@ -67,7 +67,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-28. Wrap all IOException
 [x] FR-4. List files in fs
 [x] P-7. block occupancy is not taken into account during expansion
-[ ] T-29. Extract interfaces
+[x] T-29. Extract interfaces
 [ ] T-27. Exception handling in ArgumentsApi
 [ ] T-24. Check speed of RW-operations
 
