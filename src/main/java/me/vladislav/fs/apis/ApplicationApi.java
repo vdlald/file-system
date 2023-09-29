@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import me.vladislav.fs.apis.requests.*;
 
 import java.nio.channels.SeekableByteChannel;
+import java.util.List;
 
 public interface ApplicationApi {
 
@@ -16,4 +17,6 @@ public interface ApplicationApi {
     void updateFile(@Nonnull UpdateFileRequest request);
 
     void deleteFile(@Nonnull DeleteFileRequest request);
+
+    List<String> listFiles(@Nonnull ListFilesRequest request);
 }

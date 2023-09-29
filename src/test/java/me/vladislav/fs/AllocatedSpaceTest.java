@@ -39,7 +39,7 @@ public class AllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("Must be reading with an offset")
     void testOffset() throws IOException {
-        SeekableByteChannel file = createTempFile("some content");
+        SeekableByteChannel file = createTempFile("some content").content();
 
         AllocatedSpace allocatedSpace = AllocatedSpace.builder()
                 .data(file)
@@ -55,7 +55,7 @@ public class AllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("Mustn't allow to go outside of the offset")
     void testOffsetBreak() throws IOException {
-        SeekableByteChannel file = createTempFile("some content");
+        SeekableByteChannel file = createTempFile("some content").content();
 
         AllocatedSpace allocatedSpace = AllocatedSpace.builder()
                 .data(file)
@@ -70,7 +70,7 @@ public class AllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("Must allow for increasing file size")
     void testPositionOutside() throws IOException {
-        SeekableByteChannel file = createTempFile("some content");
+        SeekableByteChannel file = createTempFile("some content").content();
 
         AllocatedSpace allocatedSpace = AllocatedSpace.builder()
                 .data(file)

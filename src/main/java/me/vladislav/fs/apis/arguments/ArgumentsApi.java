@@ -12,10 +12,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -28,12 +30,13 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
     public static final String OPERATION_READ_FILE = "read-file";
     public static final String OPERATION_UPDATE_FILE = "update-file";
     public static final String OPERATION_DELETE_FILE = "delete-file";
+    public static final String OPERATION_LIST_FILES = "list-files";
 
     private final JavaApi javaApi;
     private final ArgumentsParserFactory argumentsParserFactory;
 
     @Override
-    public void run(ApplicationArguments rawArgs) {
+    public void run(ApplicationArguments rawArgs) throws IOException {
         ArgumentsParser arguments = argumentsParserFactory.create(rawArgs);
         String operation = arguments.operation();
         if (operation == null) {
@@ -60,13 +63,21 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
                             .build()
             );
             case OPERATION_READ_FILE -> {
+                SeekableByteChannel out = arguments.fileOut();
+
                 SeekableByteChannel file = readFile(
                         ReadFileRequest.builder()
                                 .filename(arguments.filename())
                                 .fsPath(arguments.fileSystemPath())
                                 .build()
                 );
-                dumpToSystemOut(file);
+
+                if (out == null) {
+                    dumpToSystemOut(file);
+                } else {
+                    dumpToChannel(file, out);
+                    out.close();
+                }
             }
             case OPERATION_UPDATE_FILE -> updateFile(
                     UpdateFileRequest.builder()
@@ -81,6 +92,9 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
                             .fsPath(arguments.fileSystemPath())
                             .build()
             );
+            case OPERATION_LIST_FILES -> System.out.println(listFiles(ListFilesRequest.builder()
+                    .fsPath(arguments.fileSystemPath())
+                    .build()));
             default -> throw new RuntimeException();
         }
     }
@@ -92,6 +106,13 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
             System.out.println(Arrays.toString(obj.array()));
             String content = new String(obj.array(), StandardCharsets.UTF_8);
             System.out.println(content);
+        }
+    }
+
+    private void dumpToChannel(SeekableByteChannel file, SeekableByteChannel outFile) throws IOException {
+        BlockAllocatedSpace in = BlockAllocatedSpace.of(file);
+        while (in.hasNextBlock()) {
+            outFile.write(in.readBlock());
         }
     }
 
@@ -118,5 +139,10 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
     @Override
     public void deleteFile(DeleteFileRequest request) {
         javaApi.deleteFile(request);
+    }
+
+    @Override
+    public List<String> listFiles(ListFilesRequest request) {
+        return javaApi.listFiles(request);
     }
 }

@@ -7,6 +7,7 @@ import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 
 import java.nio.channels.SeekableByteChannel;
+import java.util.List;
 
 /**
  * Represents the basic operations available in the file system
@@ -42,4 +43,6 @@ public interface FileSystemOperations {
      * If the file is not found, it gives an error {@link FileNotFoundException}
      */
     void deleteFile(@Nonnull String filename);
+
+    List<String> listFiles();
 }

@@ -63,8 +63,9 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-22. Write more documentation
 [x] T-25. Extract ChainedFileDescriptorsBlock from MyFileSystemOperations
 [x] T-26. Refactor MyFileSystemOperations
-[ ] T-23. Wrap it in console app
+[x] T-23. Wrap it in console app
 [x] T-28. Wrap all IOException
+[x] FR-4. List files in fs
 [ ] T-27. Exception handling in ArgumentsApi
 [ ] T-24. Check speed of RW-operations
 

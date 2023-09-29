@@ -58,9 +58,9 @@ public class ChainedFileContentIndexBlock implements Closeable {
         currentBlockIndex = firstBlockIndex;
     }
 
-    public void readAllBlocks(SeekableByteChannel channel) {
+    public void readAllBlocks(SeekableByteChannel outChannel) {
         resetToFirstBlock();
-        AllocatedSpace outSpace = AllocatedSpace.builder().data(channel).build();
+        AllocatedSpace outSpace = AllocatedSpace.builder().data(outChannel).build();
 
         while (true) {
             for (int blockPointer : currentBlock.getBlockPointers()) {

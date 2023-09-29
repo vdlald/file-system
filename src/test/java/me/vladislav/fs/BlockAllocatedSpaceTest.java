@@ -69,7 +69,7 @@ public class BlockAllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("Must write and read")
     void testRW() throws IOException {
-        SeekableByteChannel tempFile = createTempFile("");
+        SeekableByteChannel tempFile = createTempFile("").content();
         BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(tempFile);
 
         ByteBuffer expected = ByteBuffer.allocate(BlockSize.KB_4.getBlockSizeInBytes())
@@ -100,7 +100,7 @@ public class BlockAllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("The number of blocks should increase with expansion")
     void testBlocksAmount() throws IOException {
-        SeekableByteChannel tempFile = createTempFile("");
+        SeekableByteChannel tempFile = createTempFile("").content();
         BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(tempFile);
 
         assertEquals(0, allocatedSpace.getBlocksAmount());

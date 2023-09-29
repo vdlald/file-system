@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.*;
 
 @Component
 @Scope("prototype")
@@ -27,6 +27,7 @@ public class ArgumentsParser {
     public static final String ARG_INIT_SIZE = "init-size";
     public static final String ARG_FILENAME = "filename";
     public static final String ARG_FILE_IN = "file_in";
+    public static final String ARG_FILE_OUT = "file_out";
 
     private final ApplicationArguments args;
 
@@ -58,6 +59,20 @@ public class ArgumentsParser {
     public SeekableByteChannel fileIn() {
         try {
             return Files.newByteChannel(Path.of(singleRequiredArgument(ARG_FILE_IN)), READ);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Nullable
+    public SeekableByteChannel fileOut() {
+        String out = singleNotRequiredArgument(ARG_FILE_OUT);
+        if (out == null) {
+            return null;
+        }
+
+        try {
+            return Files.newByteChannel(Path.of(out), CREATE, WRITE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

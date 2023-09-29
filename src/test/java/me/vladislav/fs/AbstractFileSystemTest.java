@@ -42,6 +42,7 @@ public class AbstractFileSystemTest {
     protected CreateFileSystemOperation createFileSystemOperation;
 
     protected FileSystem fileSystem;
+    protected CreateFileSystemRequest createFSRequest;
     protected static Path tempDirectory;
 
     @BeforeAll
@@ -50,13 +51,13 @@ public class AbstractFileSystemTest {
     }
 
     @BeforeEach
-    void setUp() throws IOException {
-        CreateFileSystemRequest request = getCreateFileSystemRequest();
-        fileSystem = createFileSystemOperation.createFileSystem(request);
+    protected void setUp() throws IOException {
+        createFSRequest = getCreateFileSystemRequest();
+        fileSystem = createFileSystemOperation.createFileSystem(createFSRequest);
     }
 
     @AfterEach
-    void cleanUp() throws IOException {
+    protected void cleanUp() throws IOException {
         fileSystem.close();
     }
 
@@ -71,7 +72,7 @@ public class AbstractFileSystemTest {
     protected CreateFileRequest createFileRequest(String content) throws IOException {
         return CreateFileRequest.builder()
                 .filename(UUID.randomUUID().toString())
-                .content(createTempFile(content))
+                .content(createTempFile(content).content())
                 .build();
     }
 
@@ -82,11 +83,11 @@ public class AbstractFileSystemTest {
                 .build();
     }
 
-    protected SeekableByteChannel createTempFile(String content) throws IOException {
+    protected TempFile createTempFile(String content) throws IOException {
         Path tempFile = Files.createTempFile("temp", "suff");
         SeekableByteChannel seekableByteChannel = Files.newByteChannel(tempFile, READ, WRITE);
         seekableByteChannel.write(ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8)));
-        return seekableByteChannel.position(0);
+        return new TempFile(tempFile, seekableByteChannel.position(0));
     }
 
     protected void assertIsEmpty(ByteBuffer buffer) {
@@ -136,8 +137,18 @@ public class AbstractFileSystemTest {
         return readFile("/files/jb.png");
     }
 
+    protected SeekableByteChannel readFileMd() throws IOException {
+        return readFile("/files/file.md");
+    }
+
     protected SeekableByteChannel readFile(String name) throws IOException {
         InputStream input = AbstractFileSystemTest.class.getResourceAsStream(name);
         return new SeekableInMemoryByteChannel(IOUtils.toByteArray(input));
+    }
+
+    protected record TempFile(
+            Path path,
+            SeekableByteChannel content
+    ) {
     }
 }

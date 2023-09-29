@@ -30,7 +30,7 @@ public class IndexedBlockAllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("When a block is deleted, it should be marked as free")
     void testFillBLockZerosMarkIndex() throws IOException {
-        SeekableByteChannel file = createTempFile("some content");
+        SeekableByteChannel file = createTempFile("some content").content();
         IndexedBlockAllocatedSpace allocatedSpace = IndexedBlockAllocatedSpace.of(file);
 
         assertFalse(allocatedSpace.isBlockFree(0));
@@ -41,7 +41,7 @@ public class IndexedBlockAllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("When data is written to a block, it must be marked busy")
     void testWriteBlockMarkIndex() throws IOException {
-        SeekableByteChannel file = createTempFile("");
+        SeekableByteChannel file = createTempFile("").content();
         IndexedBlockAllocatedSpace allocatedSpace = IndexedBlockAllocatedSpace.of(file);
 
         allocatedSpace.fillBlockZeros(0);
@@ -54,7 +54,7 @@ public class IndexedBlockAllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("When creating an object of a class, memory is scanned for free space")
     void testWhenCreate() throws IOException {
-        SeekableByteChannel file = createTempFile("some content");
+        SeekableByteChannel file = createTempFile("some content").content();
         IndexedBlockAllocatedSpace allocatedSpace = IndexedBlockAllocatedSpace.of(file);
 
         assertFalse(allocatedSpace.isBlockFree(0));

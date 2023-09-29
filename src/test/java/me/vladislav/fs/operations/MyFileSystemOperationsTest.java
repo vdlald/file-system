@@ -9,6 +9,7 @@ import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
 import me.vladislav.fs.exceptions.FileNotFoundException;
 import me.vladislav.fs.operations.my.MyFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
+import me.vladislav.fs.requests.CreateFileSystemRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -246,6 +247,34 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
             ByteBuffer actual = actualBlocks.readBlock(i);
             assertEquals(expected, actual);
         }
+        file.close();
+        fileSystem.close();
+    }
+
+    @Test
+    @DisplayName("File read, and create, and reopen fs / Small file")
+    void testCreateAndReadSmallFile() throws Exception {
+        CreateFileSystemRequest fsRequest = getCreateFileSystemRequest()
+                .withBlockSize(BlockSize.KB_4);
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(fsRequest);
+
+        CreateFileRequest request = createFileRequest(readFileMd());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        SeekableByteChannel file = readFileMd();
+
+        BlockAllocatedSpace expectedBlocks = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(file)
+                .build());
+
+        FileSystem open = openFileSystemOperation.open(fsRequest.getWhereToStore());
+        SeekableByteChannel read = open.getFileSystemOperations().readFile(request.getFilename());
+        BlockAllocatedSpace actualBlocks = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
+                .data(read)
+                .build());
+
+        assertAllocatedSpaceEquals(expectedBlocks, actualBlocks);
         file.close();
         fileSystem.close();
     }

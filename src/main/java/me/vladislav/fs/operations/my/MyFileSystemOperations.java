@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -57,6 +59,15 @@ public class MyFileSystemOperations implements FileSystemOperations {
     @PostConstruct
     private void init() {
         allocatedSpace.markBlockAsAllocated(FIRST_FILE_DESCRIPTORS_BLOCK_INDEX);
+    }
+
+    public List<String> listFiles() {
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        return descriptorChain.getAllDescriptors().stream()
+                .map(FileDescriptor::getFilename)
+                .collect(Collectors.toList());
     }
 
     @Override

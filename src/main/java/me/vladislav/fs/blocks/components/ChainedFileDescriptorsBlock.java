@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents linked blocks of file descriptors
@@ -46,6 +48,15 @@ public class ChainedFileDescriptorsBlock {
         this.descriptorsBlockSerializer = descriptorsBlockSerializer;
 
         currentBlockIndex = firstBlockIndex;
+    }
+
+    public List<FileDescriptor> getAllDescriptors() {
+        resetToFirstBlock();
+        List<FileDescriptor> fileDescriptors = new ArrayList<>();
+        do {
+            fileDescriptors.addAll(currentBlock.getDescriptors());
+        } while (currentBlock.hasNextBlock());
+        return fileDescriptors;
     }
 
     public void addFileDescriptor(@Nonnull FileDescriptor fileDescriptor) {
