@@ -2,8 +2,6 @@ package me.vladislav.fs.apis;
 
 import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.BlockAllocatedSpace;
-import me.vladislav.fs.apis.requests.CreateFileRequest;
-import me.vladislav.fs.apis.requests.ReadFileRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +20,13 @@ public class JavaApiTest extends AbstractFileSystemTest {
     void testCreateAndRead() throws IOException {
         Path fsPath = createFSRequest.getWhereToStore();
 
-        javaApi.createFile(CreateFileRequest.builder()
+        javaApi.createFile(CrudApplicationApi.CreateFileRequest.builder()
                 .fsPath(fsPath)
                 .filename("file")
                 .content(readFileMd())
                 .build());
 
-        SeekableByteChannel actual = javaApi.readFile(ReadFileRequest.builder()
+        SeekableByteChannel actual = javaApi.readFile(CrudApplicationApi.ReadFileRequest.builder()
                 .fsPath(fsPath)
                 .filename("file")
                 .build());

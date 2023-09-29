@@ -2,13 +2,13 @@ package me.vladislav.fs.apis.arguments;
 
 import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.BlockAllocatedSpace;
+import me.vladislav.fs.apis.ArgumentsApi;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.DefaultApplicationArguments;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -19,7 +19,7 @@ public class ArgumentsApiTest extends AbstractFileSystemTest {
 
     @Test
     @DisplayName("Must be creating and reading a file")
-    void testCreateAndRead() throws IOException {
+    void testCreateAndRead() throws Exception {
         Path fsPath = createFSRequest.getWhereToStore();
         TempFile tempFile = createTempFile("some content");
 

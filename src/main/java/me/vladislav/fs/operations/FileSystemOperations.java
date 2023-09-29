@@ -44,5 +44,8 @@ public interface FileSystemOperations {
      */
     void deleteFile(@Nonnull String filename);
 
+    /**
+     * Returns a list of all files in file system
+     */
     List<String> listFiles();
 }

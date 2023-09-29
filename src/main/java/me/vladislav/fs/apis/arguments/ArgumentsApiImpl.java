@@ -4,12 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.BlockSize;
-import me.vladislav.fs.apis.ApplicationApi;
+import me.vladislav.fs.apis.ArgumentsApi;
 import me.vladislav.fs.apis.JavaApi;
-import me.vladislav.fs.apis.requests.*;
 import me.vladislav.fs.util.ResourceUtils;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,15 +19,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
-
-    public static final String HELP = "help";
-    public static final String OPERATION_CREATE_FS = "create-file-system";
-    public static final String OPERATION_CREATE_FILE = "create-file";
-    public static final String OPERATION_READ_FILE = "read-file";
-    public static final String OPERATION_UPDATE_FILE = "update-file";
-    public static final String OPERATION_DELETE_FILE = "delete-file";
-    public static final String OPERATION_LIST_FILES = "list-files";
+public class ArgumentsApiImpl implements ArgumentsApi {
 
     private final JavaApi javaApi;
     private final ArgumentsParserFactory argumentsParserFactory;
