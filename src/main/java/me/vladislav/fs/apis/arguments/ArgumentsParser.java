@@ -58,7 +58,11 @@ public class ArgumentsParser {
 
     public SeekableByteChannel fileIn() {
         try {
-            return Files.newByteChannel(Path.of(singleRequiredArgument(ARG_FILE_IN)), READ);
+            Path in = Path.of(singleRequiredArgument(ARG_FILE_IN));
+            if (!Files.isRegularFile(in)) {
+                throw new RuntimeException();
+            }
+            return Files.newByteChannel(in, READ);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

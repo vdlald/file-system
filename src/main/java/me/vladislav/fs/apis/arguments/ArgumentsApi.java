@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -103,7 +102,6 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
         BlockAllocatedSpace allocatedSpace = BlockAllocatedSpace.of(channel);
         while (allocatedSpace.hasNextBlock()) {
             ByteBuffer obj = allocatedSpace.readBlock();
-            System.out.println(Arrays.toString(obj.array()));
             String content = new String(obj.array(), StandardCharsets.UTF_8);
             System.out.println(content);
         }

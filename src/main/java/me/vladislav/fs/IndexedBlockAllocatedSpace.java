@@ -52,7 +52,7 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
         return freeBlockIndex;
     }
 
-    public int getFreeBlockIndex() {
+    public int getFreeBlockIndex() {  // todo P-7: может дважды выдать blocksAmount
         int freeBlock = index.nextSetBit(lastFreeBlockIndex);
 
         if (freeBlock == -1) {
