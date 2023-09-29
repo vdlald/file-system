@@ -66,7 +66,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-23. Wrap it in console app
 [x] T-28. Wrap all IOException
 [x] FR-4. List files in fs
-[ ] P-7. block occupancy is not taken into account during expansion
+[x] P-7. block occupancy is not taken into account during expansion
 [ ] T-27. Exception handling in ArgumentsApi
 [ ] T-24. Check speed of RW-operations
 

@@ -103,7 +103,7 @@ public class ArgumentsApi implements ApplicationRunner, ApplicationApi {
         while (allocatedSpace.hasNextBlock()) {
             ByteBuffer obj = allocatedSpace.readBlock();
             String content = new String(obj.array(), StandardCharsets.UTF_8);
-            System.out.println(content);
+            System.out.print(content);
         }
     }
 

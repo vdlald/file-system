@@ -33,7 +33,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("File creation / The descriptor must be written")
     void testCreateFileDescriptor() throws Exception {
-        CreateFileRequest request = createFileRequest("");
+        CreateFileRequest request = createFileRequest(" ");
 
         fileSystem.getFileSystemOperations().createFile(request);
 

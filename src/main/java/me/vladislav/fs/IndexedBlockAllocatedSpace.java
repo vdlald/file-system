@@ -12,19 +12,16 @@ import java.util.stream.IntStream;
  */
 public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
 
-    private final BitSet index;
+    private final BitSet allocatedIndex;
     private int lastFreeBlockIndex = 0;
 
     public IndexedBlockAllocatedSpace(BlockSize blockSize, AllocatedSpace allocatedSpace) {
         super(blockSize, allocatedSpace);
 
-        index = new BitSet(blocksAmount);
-        index.set(0, blocksAmount, true);
+        allocatedIndex = new BitSet(blocksAmount);
         for (int i = 0; i < blocksAmount; i++) {
             ByteBuffer block = readBlock(i);
-            if (!ByteBufferUtils.isEmpty(block)) {
-                index.set(i, false);
-            }
+            allocatedIndex.set(i, !ByteBufferUtils.isEmpty(block));
         }
     }
 
@@ -37,12 +34,12 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
 
     @Override
     public void writeBlock(int blockIndex, ByteBuffer data) {
-        index.set(blockIndex, ByteBufferUtils.isEmpty(data));
+        allocatedIndex.set(blockIndex, !ByteBufferUtils.isEmpty(data));
         super.writeBlock(blockIndex, data);
     }
 
     public void fillBlockZeros(int blockIndex) {
-        index.set(blockIndex, true);
+        allocatedIndex.set(blockIndex, false);
         super.fillBlockZeros(blockIndex);
     }
 
@@ -53,10 +50,10 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
     }
 
     public int getFreeBlockIndex() {  // todo P-7: может дважды выдать blocksAmount
-        int freeBlock = index.nextSetBit(lastFreeBlockIndex);
+        int freeBlock = allocatedIndex.nextClearBit(lastFreeBlockIndex);
 
         if (freeBlock == -1) {
-            freeBlock = index.previousSetBit(lastFreeBlockIndex);
+            freeBlock = allocatedIndex.previousClearBit(lastFreeBlockIndex);
         }
 
         if (freeBlock == -1) {
@@ -67,11 +64,11 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
     }
 
     public boolean isBlockFree(int blockIndex) {
-        return index.get(blockIndex);
+        return !allocatedIndex.get(blockIndex);
     }
 
     public void markBlockAsAllocated(int blockIndex) {
-        index.set(blockIndex, false);
+        allocatedIndex.set(blockIndex, true);
     }
 
     public IntStream getFreeBlocksIndexStream() {
