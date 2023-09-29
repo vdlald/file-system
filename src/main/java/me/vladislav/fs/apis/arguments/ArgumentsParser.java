@@ -28,8 +28,9 @@ public class ArgumentsParser {
     public static final String ARG_FILESYSTEM = "fs";
     public static final String ARG_INIT_SIZE = "init-size";
     public static final String ARG_FILENAME = "filename";
-    public static final String ARG_FILE_IN = "file_in";
-    public static final String ARG_FILE_OUT = "file_out";
+    public static final String ARG_NEW_FILENAME = "new-filename";
+    public static final String ARG_FILE_IN = "file-in";
+    public static final String ARG_FILE_OUT = "file-out";
 
     private final ApplicationArguments args;
 
@@ -56,6 +57,10 @@ public class ArgumentsParser {
 
     public String filename() {
         return singleRequiredArgument(ARG_FILENAME);
+    }
+
+    public String newFilename() {
+        return singleRequiredArgument(ARG_NEW_FILENAME);
     }
 
     public SeekableByteChannel fileIn() {

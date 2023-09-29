@@ -1,5 +1,6 @@
 package me.vladislav.fs.apis.arguments;
 
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.BlockAllocatedSpace;
@@ -85,6 +86,11 @@ public class ArgumentsApiImpl implements ArgumentsApi {
             case OPERATION_LIST_FILES -> System.out.println(listFiles(ListFilesRequest.builder()
                     .fsPath(arguments.fileSystemPath())
                     .build()));
+            case OPERATION_MOVE_FILE -> moveFile(MoveFileRequest.builder()
+                    .fsPath(arguments.fileSystemPath())
+                    .filename(arguments.filename())
+                    .newFilename(arguments.newFilename())
+                    .build());
             default -> throw new UnknownOperationException(operation);
         }
     }
@@ -133,5 +139,10 @@ public class ArgumentsApiImpl implements ArgumentsApi {
     @Override
     public List<String> listFiles(ListFilesRequest request) {
         return javaApi.listFiles(request);
+    }
+
+    @Override
+    public void moveFile(@Nonnull MoveFileRequest request) {
+        javaApi.moveFile(request);
     }
 }

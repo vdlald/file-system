@@ -11,14 +11,29 @@ import java.util.List;
 
 public interface ApplicationApi extends CrudApplicationApi {
 
+    /**
+     * Create new file system
+     */
     void createFileSystem(@Nonnull CreateFileSystemRequest request);
 
+    /**
+     * List files in file system
+     */
     List<String> listFiles(@Nonnull ListFilesRequest request);
+
+    /**
+     *
+     */
+    void moveFile(@Nonnull MoveFileRequest request);
 
     @Getter
     @Builder
     class ListFilesRequest {
 
+        /**
+         * Path to the file system
+         */
+        @Nonnull
         private final Path fsPath;
     }
 
@@ -44,5 +59,28 @@ public interface ApplicationApi extends CrudApplicationApi {
          */
         @Builder.Default
         private final BlockSize blockSize = BlockSize.KB_4;
+    }
+
+    @Getter
+    @Builder
+    class MoveFileRequest {
+
+        /**
+         * Path to the file system
+         */
+        @Nonnull
+        private final Path fsPath;
+
+        /**
+         * Original filename
+         */
+        @Nonnull
+        private final String filename;
+
+        /**
+         * New filename
+         */
+        @Nonnull
+        private final String newFilename;
     }
 }

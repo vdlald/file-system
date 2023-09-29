@@ -2,7 +2,7 @@ NAME
 sfs – file system in a single file
 
 SYNOPSIS
-sfs [--operation=what_to_do] [--fs=path] [--init-size=num] [--filename=path] [--file_in=path]
+sfs [--operation=what_to_do] [--fs=path] [--init-size=num] [--filename=path] [--file-in=path]
 
 DESCRIPTION
 The utility allows you to create and manage a file system (fs) in a single file.
@@ -32,7 +32,7 @@ The utility allows you to create and manage a file system (fs) in a single file.
              be created, and in other cases indicates the file in the file system 
              to be operated on
 
-     --file_in=path
+     --file-in=path
              Allows you to specify from which file to read content when creating 
              a file in the file system
 
@@ -51,7 +51,7 @@ The command:
 
      The command:
 
-           sfs --operation=create-file --fs=./filesystem --filename=some --file_in=../cat1.png
+           sfs --operation=create-file --fs=./filesystem --filename=some --file-in=../cat1.png
 
      a file "cat1.png" will be created in the "./filesystem" file system with 
      content from the "../cat1.png" file.

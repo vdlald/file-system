@@ -117,6 +117,10 @@ public class ChainedFileDescriptorsBlock {
         currentBlockIndex = firstBlockIndex;
     }
 
+    public void saveCurrentBlock() {
+        allocatedSpace.writeBlock(currentBlockIndex, descriptorsBlockSerializer.toByteBuffer(currentBlock));
+    }
+
     private void nextBlock() {
         ByteBuffer buffer = descriptorsBlockSerializer.toByteBuffer(currentBlock);
         allocatedSpace.writeBlock(currentBlockIndex, buffer);

@@ -61,15 +61,6 @@ public class MyFileSystemOperations implements FileSystemOperations {
         allocatedSpace.markBlockAsAllocated(FIRST_FILE_DESCRIPTORS_BLOCK_INDEX);
     }
 
-    public List<String> listFiles() {
-        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
-                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
-
-        return descriptorChain.getAllDescriptors().stream()
-                .map(FileDescriptor::getFilename)
-                .collect(Collectors.toList());
-    }
-
     @Override
     public void createFile(@Nonnull CreateFileRequest createFileRequest) {
         String filename = createFileRequest.getFilename();
@@ -180,5 +171,34 @@ public class MyFileSystemOperations implements FileSystemOperations {
         if (!descriptorChain.removeFileDescriptor(filename)) {
             throw new FileNotFoundException(filename);
         }
+    }
+
+    public List<String> listFiles() {
+        log.info("listing files");
+
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        return descriptorChain.getAllDescriptors().stream()
+                .map(FileDescriptor::getFilename)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void moveFile(String filename, String newFilename) {
+        ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
+                FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
+
+        if (descriptorChain.getFileDescriptor(newFilename) != null) {
+            throw new FileAlreadyExistsException(newFilename);
+        }
+
+        FileDescriptor fileDescriptor = descriptorChain.getFileDescriptor(filename);
+        if (fileDescriptor == null) {
+            throw new FileNotFoundException(filename);
+        }
+
+        fileDescriptor.setFilename(newFilename);
+        descriptorChain.saveCurrentBlock();
     }
 }

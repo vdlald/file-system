@@ -19,19 +19,12 @@ public class JavaApiImpl implements JavaApi {
     private final CreateFileSystemOperation createFileSystemOperation;
 
     @Override
-    public List<String> listFiles(@Nonnull ListFilesRequest request) {
-        try (FileSystem fileSystem = openFileSystemOperation.open(request.getFsPath())) {
-            return fileSystem.getFileSystemOperations().listFiles();
-        }
-    }
-
-    @Override
     public void createFileSystem(@Nonnull CreateFileSystemRequest request) {
         createFileSystemOperation.createFileSystem(me.vladislav.fs.requests.CreateFileSystemRequest.builder()
                 .initialSizeInBytes(request.getInitialSizeInBytes())
                 .blockSize(request.getBlockSize())
                 .whereToStore(request.getWhereToStore())
-                .build());
+                .build()).close();
     }
 
     @Override
@@ -65,6 +58,20 @@ public class JavaApiImpl implements JavaApi {
     public void deleteFile(@Nonnull DeleteFileRequest request) {
         try (FileSystem fileSystem = openFileSystemOperation.open(request.getFsPath())) {
             fileSystem.getFileSystemOperations().deleteFile(request.getFilename());
+        }
+    }
+
+    @Override
+    public List<String> listFiles(@Nonnull ListFilesRequest request) {
+        try (FileSystem fileSystem = openFileSystemOperation.open(request.getFsPath())) {
+            return fileSystem.getFileSystemOperations().listFiles();
+        }
+    }
+
+    @Override
+    public void moveFile(@Nonnull MoveFileRequest request) {
+        try (FileSystem fileSystem = openFileSystemOperation.open(request.getFsPath())) {
+            fileSystem.getFileSystemOperations().moveFile(request.getFilename(), request.getNewFilename());
         }
     }
 }

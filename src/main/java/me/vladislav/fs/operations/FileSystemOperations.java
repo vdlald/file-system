@@ -48,4 +48,12 @@ public interface FileSystemOperations {
      * Returns a list of all files in file system
      */
     List<String> listFiles();
+
+    /**
+     * Move file
+     *
+     * @param filename    original file name
+     * @param newFilename new file name
+     */
+    void moveFile(String filename, String newFilename);
 }

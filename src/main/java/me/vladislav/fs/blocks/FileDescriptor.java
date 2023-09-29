@@ -1,10 +1,7 @@
 package me.vladislav.fs.blocks;
 
 import jakarta.annotation.Nonnull;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 @ToString
 @EqualsAndHashCode
@@ -15,9 +12,10 @@ public class FileDescriptor {
     public static final int FILE_BLOCK_INDEX_SIZE = 4;
     public static final int TOTAL_SIZE = FILENAME_SIZE + FILE_BLOCK_INDEX_SIZE;
 
+    @Setter
     @Getter
     @Nonnull
-    private final String filename;
+    private String filename;
 
     @Getter
     private final int fileBlockIndex;

@@ -10,6 +10,7 @@ public interface ArgumentsApi extends ApplicationRunner, ApplicationApi {
     String OPERATION_UPDATE_FILE = "update-file";
     String OPERATION_DELETE_FILE = "delete-file";
     String OPERATION_LIST_FILES = "list-files";
+    String OPERATION_MOVE_FILE = "move-file";
 
     class ArgumentsApiException extends RuntimeException {
         public ArgumentsApiException(Throwable cause) {

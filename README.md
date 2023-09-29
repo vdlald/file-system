@@ -71,7 +71,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-27. Exception handling in ArgumentsApi
 [x] T-30. Refactor exceptions
 [ ] T-31. Write documentation of the memory organization
-[ ] FR-6. Move the file
+[x] FR-6. Move the file
 [ ] T-24. Check speed of RW-operations
 
 [ ] P-2. FS initial max size is only 2GB

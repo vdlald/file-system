@@ -371,6 +371,24 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
     }
 
     @Test
+    @DisplayName("File must be moved")
+    void testMoveFile() throws Exception {
+        CreateFileRequest request = createFileRequest(readFileMd());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+        fileSystem.getFileSystemOperations().moveFile(request.getFilename(), "moved");
+
+        SeekableByteChannel file = fileSystem.getFileSystemOperations().readFile("moved");
+
+        assertAllocatedSpaceEquals(BlockAllocatedSpace.of(readFileMd()), BlockAllocatedSpace.of(file));
+
+        assertThrows(
+                FileNotFoundException.class,
+                () -> fileSystem.getFileSystemOperations().readFile(request.getFilename())
+        );
+    }
+
+    @Test
     @DisplayName("Check a series of file creations, deletions, updates and reads")
     void testComplexBehavior() throws IOException {
         BlockAllocatedSpace cat2 = BlockAllocatedSpace.of(readCat2());
