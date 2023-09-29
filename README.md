@@ -68,7 +68,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] FR-4. List files in fs
 [x] P-7. block occupancy is not taken into account during expansion
 [x] T-29. Extract interfaces
-[ ] T-27. Exception handling in ArgumentsApi
+[x] T-27. Exception handling in ArgumentsApi
 [ ] T-24. Check speed of RW-operations
 
 [ ] P-2. FS initial max size is only 2GB
@@ -79,6 +79,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [ ] FR-1. Compress data
 [ ] FR-2. Encrypt data
 [ ] FR-3. Defragmentation
+[ ] FR-5. Implement FileSystemProvider
 
 # Researching
 
