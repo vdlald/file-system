@@ -60,7 +60,7 @@ public class AbstractFileSystemTest {
     }
 
     @AfterEach
-    protected void cleanUp() throws IOException {
+    protected void cleanUp() {
         fileSystem.close();
     }
 
@@ -133,7 +133,9 @@ public class AbstractFileSystemTest {
             ByteBuffer buffer1 = ByteBuffer.allocate(KB_8);
             ByteBuffer buffer2 = ByteBuffer.allocate(KB_8);
             assertEquals(expected.read(buffer1), actual.read(buffer2));
-            assertEquals(buffer1.rewind(), buffer2.rewind());
+            assertEquals(buffer1.rewind(), buffer2.rewind(),
+                    () -> "expected: %s\nactual: %s".formatted(
+                            ByteBufferUtils.readToString(buffer1), ByteBufferUtils.readToString(buffer2)));
             read += KB_8;
         } while (expected.size() > read);
     }
@@ -172,6 +174,7 @@ public class AbstractFileSystemTest {
 
     protected SeekableByteChannel readFile(String name) throws IOException {
         InputStream input = AbstractFileSystemTest.class.getResourceAsStream(name);
+        assert input != null;
         return new SeekableInMemoryByteChannel(IOUtils.toByteArray(input));
     }
 

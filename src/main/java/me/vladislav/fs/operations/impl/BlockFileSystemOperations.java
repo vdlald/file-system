@@ -1,4 +1,4 @@
-package me.vladislav.fs.operations.my;
+package me.vladislav.fs.operations.impl;
 
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -154,6 +154,13 @@ public class BlockFileSystemOperations implements ExtendedFileSystemOperations {
         if (fileDescriptor == null) {
             throw new FileNotFoundException(filename);
         }
+
+        try {
+            fileDescriptor.setFileSize(updateFileRequest.getContent().size());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        descriptorChain.saveCurrentBlock();
 
         BlockAllocatedSpace content = new BlockAllocatedSpace(allocatedSpace.getBlockSize(), AllocatedSpace.builder()
                 .data(updateFileRequest.getContent())

@@ -4,12 +4,14 @@ import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.BlockAllocatedSpace;
 import me.vladislav.fs.util.ByteBufferUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.DefaultApplicationArguments;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -23,6 +25,24 @@ public class ArgumentsApiImplTest extends AbstractFileSystemTest {
 
     @Autowired
     private ArgumentsApiImpl argumentsApi;
+
+    protected Path tempOut;
+    protected Path tempErr;
+
+    @Override
+    @BeforeEach
+    protected void setUp() throws IOException {
+        super.setUp();
+
+        tempOut = Files.createTempFile("temp", "suff");
+        tempErr = Files.createTempFile("temp", "suff");
+
+        PrintStream outPrint = new PrintStream(tempOut.toFile());
+        PrintStream errPrint = new PrintStream(tempErr.toFile());
+
+        System.setOut(outPrint);
+        System.setErr(errPrint);
+    }
 
     @Test
     @DisplayName("Must be creating and reading a file")
@@ -128,23 +148,12 @@ public class ArgumentsApiImplTest extends AbstractFileSystemTest {
     void testArgumentValidationException() throws Exception {
         Path fsPath = createFSRequest.getWhereToStore();
 
-        Path tempOut = Files.createTempFile("temp", "suff");
-        PrintStream outPrint = new PrintStream(tempOut.toFile());
-        System.setOut(outPrint);
-
-        Path tempErr = Files.createTempFile("temp", "suff");
-        PrintStream errPrint = new PrintStream(tempErr.toFile());
-        System.setErr(errPrint);
-
         ApplicationArguments checksum = new DefaultApplicationArguments(
                 "--fs=" + fsPath,
                 "--operation=md5-checksum",
                 "--file-name=file"
         );
         argumentsApi.run(checksum);
-
-        outPrint.close();
-        errPrint.close();
 
         SeekableByteChannel out = Files.newByteChannel(tempOut, READ);
         AllocatedSpace allocatedSpace = AllocatedSpace.builder().data(out).build();
@@ -166,5 +175,42 @@ public class ArgumentsApiImplTest extends AbstractFileSystemTest {
 
         read = allocatedSpace.read(1000);
         assertFalse(ByteBufferUtils.isEmpty(read));
+    }
+
+    @Test
+    @DisplayName("The file must be updated correctly")
+    void testUpdate() throws Exception {
+        Path fsPath = createFSRequest.getWhereToStore();
+        TempFile tempFile = createTempFile("some content");
+
+        ApplicationArguments createFile = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=create-file",
+                "--file-in=" + tempFile.path(),
+                "--filename=file"
+        );
+        argumentsApi.run(createFile);
+
+        TempFile updTempFile = createTempFile(readCat5());
+
+        ApplicationArguments updateFile = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=update-file",
+                "--file-in=" + updTempFile.path(),
+                "--filename=file"
+        );
+        argumentsApi.run(updateFile);
+
+        TempFile outTemp = createTempFile("");
+        ApplicationArguments readFile = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=read-file",
+                "--file-out=" + outTemp.path(),
+                "--filename=file"
+        );
+        argumentsApi.run(readFile);
+
+
+        assertChannelsContentEquals(outTemp.content().position(0), Files.newByteChannel(updTempFile.path()));
     }
 }

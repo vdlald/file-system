@@ -20,7 +20,7 @@ import java.time.ZonedDateTime;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static me.vladislav.fs.operations.my.BlockFileSystemOperations.METHOD_NAME;
+import static me.vladislav.fs.operations.impl.BlockFileSystemOperations.METHOD_NAME;
 
 @Slf4j
 @Component

@@ -9,8 +9,6 @@ import me.vladislav.fs.FileSystem.Metadata;
 import me.vladislav.fs.converters.FileSystemMetadataBytesConverter;
 import me.vladislav.fs.exceptions.OpenFileSystemException;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
-import me.vladislav.fs.operations.my.BlockFileSystemOperations;
-import me.vladislav.fs.operations.my.BlockFileSystemOperationsFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

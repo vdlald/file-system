@@ -19,8 +19,10 @@ public class FileDescriptor {
     private String filename;
 
     @Getter
-    private final int fileBlockIndex;
+    @Setter
+    private long fileSize;
 
     @Getter
-    private final long fileSize;
+    private final int fileBlockIndex;
+
 }

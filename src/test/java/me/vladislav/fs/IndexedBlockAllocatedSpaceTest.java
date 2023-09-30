@@ -1,6 +1,6 @@
 package me.vladislav.fs;
 
-import me.vladislav.fs.operations.my.BlockFileSystemOperations;
+import me.vladislav.fs.operations.impl.BlockFileSystemOperations;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

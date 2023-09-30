@@ -1,4 +1,4 @@
-package me.vladislav.fs.operations.my;
+package me.vladislav.fs.operations.impl;
 
 import lombok.RequiredArgsConstructor;
 import me.vladislav.fs.AllocatedSpace;

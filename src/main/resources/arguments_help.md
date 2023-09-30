@@ -15,7 +15,8 @@ The utility allows you to create and manage a file system (fs) in a single file.
              "create-file-system" - create file system, 
              "create-file" - create file in fs, "read-file" - read file from fs, 
              "update-file" - update file in fs, "delete-file" - delete file in fs
-             "list-files" - list all files in fs.
+             "list-files" - list all files in fs, "move-file" - move a file from one 
+             location to another, "md5-checksum" - calculate the check sum of the file 
 
      --fs=path
              Allows you to specify the path to the file system. When 

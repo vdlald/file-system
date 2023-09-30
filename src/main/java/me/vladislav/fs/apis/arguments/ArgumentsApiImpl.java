@@ -29,13 +29,19 @@ public class ArgumentsApiImpl implements ArgumentsApi {
     @Override
     public void run(ApplicationArguments rawArgs) throws IOException {
         ArgumentsParser arguments = argumentsParserFactory.create(rawArgs);
+
+        if (rawArgs.containsOption("help")) {
+            printHelp();
+            return;
+        }
+
         String operation = arguments.operation();
         if (operation == null) {
             return;
         }
 
         switch (operation) {
-            case HELP -> System.out.println(ResourceUtils.getResourceAsString("/arguments_help.md"));
+            case HELP -> printHelp();
             case OPERATION_CREATE_FS -> {
                 var request = CreateFileSystemRequest.builder()
                         .whereToStore(arguments.fileSystemPath())
@@ -116,6 +122,10 @@ public class ArgumentsApiImpl implements ArgumentsApi {
         while (in.hasNextBlock()) {
             outFile.write(in.readBlock());
         }
+    }
+
+    private void printHelp() {
+        System.out.println(ResourceUtils.getResourceAsString("/arguments_help.md"));
     }
 
     @Override

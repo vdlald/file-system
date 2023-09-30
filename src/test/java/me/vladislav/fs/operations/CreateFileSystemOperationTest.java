@@ -2,7 +2,7 @@ package me.vladislav.fs.operations;
 
 import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.FileSystem;
-import me.vladislav.fs.operations.my.BlockFileSystemOperations;
+import me.vladislav.fs.operations.impl.BlockFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

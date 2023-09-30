@@ -7,7 +7,7 @@ import me.vladislav.fs.blocks.FileDescriptorsBlock;
 import me.vladislav.fs.blocks.converters.FileContentIndexBlockBytesConverter;
 import me.vladislav.fs.blocks.converters.FileDescriptorsBlockBytesConverter;
 import me.vladislav.fs.exceptions.FileNotFoundException;
-import me.vladislav.fs.operations.my.BlockFileSystemOperations;
+import me.vladislav.fs.operations.impl.BlockFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
@@ -96,22 +96,10 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
         assertNotNull(descriptor);
         assertNotEquals(0, descriptor.getFileBlockIndex());
 
-        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
-                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+        SeekableByteChannel expected = readCvFile();
 
-        SeekableByteChannel file = readCvFile();
-
-        BlockAllocatedSpace blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
-                .data(file)
-                .build());
-
-        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
-            assertEquals(
-                    blockAllocatedSpace.readBlock(i),
-                    allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i))
-            );
-        }
-        file.close();
+        assertChannelsContentEquals(expected, fsOperations.readFile(request.getFilename()));
+        expected.close();
     }
 
     @Test
@@ -135,21 +123,10 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
         assertNotNull(descriptor);
         assertNotEquals(0, descriptor.getFileBlockIndex());
 
-        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
-                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
+        SeekableByteChannel expected = readJbFile();
+        assertChannelsContentEquals(expected, fsOperations.readFile(request.getFilename()));
 
-        SeekableByteChannel file = readJbFile();
-
-        BlockAllocatedSpace blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
-                .data(file)
-                .build());
-
-        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
-            ByteBuffer expected = blockAllocatedSpace.readBlock(i);
-            ByteBuffer actual = allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i));
-            assertEquals(expected, actual);
-        }
-        file.close();
+        expected.close();
         fileSystem.close();
     }
 
@@ -160,64 +137,14 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
                 .withBlockSize(BlockSize.KB_4));
 
         CreateFileRequest request1 = createFileRequest(readJbFile());
-        fileSystem.getFileSystemOperations().createFile(request1);
+        ExtendedFileSystemOperations fsOperations = fileSystem.getFileSystemOperations();
+        fsOperations.createFile(request1);
 
         CreateFileRequest request2 = createFileRequest(readCvFile());
-        fileSystem.getFileSystemOperations().createFile(request2);
+        fsOperations.createFile(request2);
 
-        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
-        BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
-        ByteBuffer firstBlock = allocatedSpace.readBlock(0);
-
-        FileDescriptorsBlock descriptors = fileDescriptorsBlockBytesSerializer.from(firstBlock);
-
-        // check first file
-        FileDescriptor descriptor = descriptors.getDescriptor(0);
-
-        assertNotNull(descriptor);
-        assertNotEquals(0, descriptor.getFileBlockIndex());
-
-        FileContentIndexBlock indexBlock = indexBlockBytesSerializer.from(
-                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
-
-        SeekableByteChannel file = readJbFile();
-
-        BlockAllocatedSpace blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
-                .data(file)
-                .build());
-
-        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
-            assertEquals(
-                    blockAllocatedSpace.readBlock(i),
-                    allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i))
-            );
-        }
-        file.close();
-
-
-        // check second file
-        descriptor = descriptors.getDescriptor(1);
-
-        assertNotNull(descriptor);
-        assertNotEquals(0, descriptor.getFileBlockIndex());
-
-        indexBlock = indexBlockBytesSerializer.from(
-                allocatedSpace.readBlock(descriptor.getFileBlockIndex()));
-
-        file = readCvFile();
-
-        blockAllocatedSpace = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
-                .data(file)
-                .build());
-
-        for (int i = 0; i < indexBlock.getBlockPointers().size(); i++) {
-            assertEquals(
-                    blockAllocatedSpace.readBlock(i),
-                    allocatedSpace.readBlock(indexBlock.getBlockPointers().get(i))
-            );
-        }
-        file.close();
-        fileSystem.close();
+        assertChannelsContentEquals(readJbFile(), fsOperations.readFile(request1.getFilename()));
+        assertChannelsContentEquals(readCvFile(), fsOperations.readFile(request2.getFilename()));
     }
 
     @Test
@@ -314,9 +241,8 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
 
         CreateFileRequest request = createFileRequest(readJbFile());
 
+        ExtendedFileSystemOperations fsOperations = fileSystem.getFileSystemOperations();
         fileSystem.getFileSystemOperations().createFile(request);
-
-        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
 
         String filename = request.getFilename();
         UpdateFileRequest updateFileRequest = UpdateFileRequest.builder()
@@ -326,13 +252,7 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fsOperations.updateFile(updateFileRequest);
 
-        BlockAllocatedSpace actual = BlockAllocatedSpace.of(fsOperations.readFile(filename));
-        BlockAllocatedSpace expected = BlockAllocatedSpace.of(readCvFile());
-
-        for (int i = 0; i < expected.getBlocksAmount(); i++) {
-            assertEquals(expected.readBlock(i), actual.readBlock(i));
-        }
-
+        assertChannelsContentEquals(readCvFile(), fsOperations.readFile(filename));
         fileSystem.close();
     }
 
@@ -344,9 +264,8 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
 
         CreateFileRequest request = createFileRequest(readCvFile());
 
-        fileSystem.getFileSystemOperations().createFile(request);
-
-        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
+        ExtendedFileSystemOperations fsOperations = fileSystem.getFileSystemOperations();
+        fsOperations.createFile(request);
 
         String filename = request.getFilename();
         UpdateFileRequest updateFileRequest = UpdateFileRequest.builder()
@@ -356,13 +275,7 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fsOperations.updateFile(updateFileRequest);
 
-        BlockAllocatedSpace actual = BlockAllocatedSpace.of(fsOperations.readFile(filename));
-        BlockAllocatedSpace expected = BlockAllocatedSpace.of(readJbFile());
-
-        for (int i = 0; i < expected.getBlocksAmount(); i++) {
-            assertEquals(expected.readBlock(i), actual.readBlock(i));
-        }
-
+        assertChannelsContentEquals(readJbFile(), fsOperations.readFile(filename));
         fileSystem.close();
     }
 
@@ -398,12 +311,6 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("Check a series of file creations, deletions, updates and reads")
     void testComplexBehavior() throws IOException {
-        BlockAllocatedSpace cat2 = BlockAllocatedSpace.of(readCat2());
-        BlockAllocatedSpace cat3 = BlockAllocatedSpace.of(readCat3());
-        BlockAllocatedSpace cat4 = BlockAllocatedSpace.of(readCat4());
-        BlockAllocatedSpace cat5 = BlockAllocatedSpace.of(readCat5());
-        BlockAllocatedSpace jb = BlockAllocatedSpace.of(readJbFile());
-
         ExtendedFileSystemOperations operations = fileSystem.getFileSystemOperations();
 
         CreateFileRequest createCat1 = createFileRequest(readCat1());
@@ -421,35 +328,26 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
                 .content(readCat2())
                 .build());
 
-        assertAllocatedSpaceEquals(
-                cat2,
-                BlockAllocatedSpace.of(operations.readFile(createCat1.getFilename()))
-        );
+        assertChannelsContentEquals(readCat2(), operations.readFile(createCat1.getFilename()));
 
         operations.updateFile(UpdateFileRequest.builder()
                 .filename(createCat1.getFilename())
                 .content(readCat4())
                 .build());
 
-        assertAllocatedSpaceEquals(
-                cat4,
-                BlockAllocatedSpace.of(operations.readFile(createCat1.getFilename()))
-        );
+        assertChannelsContentEquals(readCat4(), operations.readFile(createCat1.getFilename()));
 
         operations.updateFile(UpdateFileRequest.builder()
                 .filename(createCat1.getFilename())
                 .content(readCat3())
                 .build());
 
-        BlockAllocatedSpace file1Actual = BlockAllocatedSpace.of(operations.readFile(createCat1.getFilename()));
-        assertAllocatedSpaceEquals(cat3, file1Actual);
-        file1Actual.close();
+        assertChannelsContentEquals(readCat3(), operations.readFile(createCat1.getFilename()));
 
         CreateFileRequest createCat5 = createFileRequest(readCat5());
         operations.createFile(createCat5);
 
-        BlockAllocatedSpace file2Actual = BlockAllocatedSpace.of(operations.readFile(createCat5.getFilename()));
-        assertAllocatedSpaceEquals(cat5, file2Actual);
+        assertChannelsContentEquals(readCat5(), operations.readFile(createCat5.getFilename()));
 
         CreateFileRequest createCat4 = createFileRequest(readCat4());
         operations.createFile(createCat4);
@@ -461,7 +359,6 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
                 .filename(createCat4.getFilename())
                 .build());
 
-        BlockAllocatedSpace file3Actual = BlockAllocatedSpace.of(operations.readFile(createCat4.getFilename()));
-        assertAllocatedSpaceEquals(jb, file3Actual);
+        assertChannelsContentEquals(readJbFile(), operations.readFile(createCat4.getFilename()));
     }
 }
