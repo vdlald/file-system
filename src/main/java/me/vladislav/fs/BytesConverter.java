@@ -4,7 +4,7 @@ import jakarta.annotation.Nonnull;
 
 import java.nio.ByteBuffer;
 
-public interface BytesSerializer<T> {
+public interface BytesConverter<T> {
 
     @Nonnull
     T from(@Nonnull ByteBuffer src);

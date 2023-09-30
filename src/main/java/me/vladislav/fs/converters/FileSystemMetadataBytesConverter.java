@@ -1,7 +1,7 @@
-package me.vladislav.fs.serializers;
+package me.vladislav.fs.converters;
 
 import me.vladislav.fs.BlockSize;
-import me.vladislav.fs.BytesSerializer;
+import me.vladislav.fs.BytesConverter;
 import me.vladislav.fs.FileSystem;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static me.vladislav.fs.FileSystem.Metadata.*;
 
 @Component
-public class FileSystemMetadataBytesSerializer implements BytesSerializer<FileSystem.Metadata> {
+public class FileSystemMetadataBytesConverter implements BytesConverter<FileSystem.Metadata> {
 
     private static final DateTimeFormatter CREATED_AT_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 

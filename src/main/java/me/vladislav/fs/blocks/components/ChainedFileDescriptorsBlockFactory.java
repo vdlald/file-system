@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
-import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
+import me.vladislav.fs.blocks.converters.FileDescriptorsBlockBytesConverter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 public class ChainedFileDescriptorsBlockFactory {
 
     private final ObjectProvider<ChainedFileDescriptorsBlock> objectProvider;
-    private final FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer;
+    private final FileDescriptorsBlockBytesConverter descriptorsBlockSerializer;
 
     @Nonnull
     public ChainedFileDescriptorsBlock create(

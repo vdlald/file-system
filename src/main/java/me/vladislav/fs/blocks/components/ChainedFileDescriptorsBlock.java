@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
-import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
+import me.vladislav.fs.blocks.converters.FileDescriptorsBlockBytesConverter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -33,14 +33,14 @@ public class ChainedFileDescriptorsBlock {
     private FileDescriptorsBlock currentBlock;
 
     private final IndexedBlockAllocatedSpace allocatedSpace;
-    private final FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer;
+    private final FileDescriptorsBlockBytesConverter descriptorsBlockSerializer;
 
     @SuppressWarnings("all")
     public ChainedFileDescriptorsBlock(
             int firstBlockIndex,
             FileDescriptorsBlock fileDescriptorsBlock,
             IndexedBlockAllocatedSpace allocatedSpace,
-            FileDescriptorsBlockBytesSerializer descriptorsBlockSerializer
+            FileDescriptorsBlockBytesConverter descriptorsBlockSerializer
     ) {
         this.allocatedSpace = allocatedSpace;
         this.firstBlockIndex = firstBlockIndex;

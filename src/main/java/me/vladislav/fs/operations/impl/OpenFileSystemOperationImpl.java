@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.FileSystem;
 import me.vladislav.fs.FileSystem.Metadata;
+import me.vladislav.fs.converters.FileSystemMetadataBytesConverter;
 import me.vladislav.fs.exceptions.OpenFileSystemException;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
-import me.vladislav.fs.operations.my.MyFileSystemOperations;
-import me.vladislav.fs.operations.my.MyFileSystemOperationsFactory;
-import me.vladislav.fs.serializers.FileSystemMetadataBytesSerializer;
+import me.vladislav.fs.operations.my.BlockFileSystemOperations;
+import me.vladislav.fs.operations.my.BlockFileSystemOperationsFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,8 +26,8 @@ import static java.nio.file.StandardOpenOption.WRITE;
 @RequiredArgsConstructor
 public class OpenFileSystemOperationImpl implements OpenFileSystemOperation {
 
-    private final FileSystemMetadataBytesSerializer metadataBytesSerializer;
-    private final MyFileSystemOperationsFactory myFileSystemOperationsFactory;
+    private final FileSystemMetadataBytesConverter metadataBytesSerializer;
+    private final BlockFileSystemOperationsFactory blockFileSystemOperationsFactory;
 
     @Nonnull
     @Override
@@ -60,7 +60,7 @@ public class OpenFileSystemOperationImpl implements OpenFileSystemOperation {
             throw new OpenFileSystemException(e);
         }
 
-        MyFileSystemOperations fileSystemOperations = myFileSystemOperationsFactory.create(
+        BlockFileSystemOperations fileSystemOperations = blockFileSystemOperationsFactory.create(
                 allocatedFilesSpace, metadata.getBlockSize());
         return FileSystem.builder()
                 .metadata(metadata)

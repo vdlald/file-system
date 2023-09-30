@@ -1,6 +1,6 @@
-package me.vladislav.fs.blocks.serializers;
+package me.vladislav.fs.blocks.converters;
 
-import me.vladislav.fs.BytesSerializer;
+import me.vladislav.fs.BytesConverter;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 @Component
-public class FileContentIndexBlockBytesSerializer implements BytesSerializer<FileContentIndexBlock> {
+public class FileContentIndexBlockBytesConverter implements BytesConverter<FileContentIndexBlock> {
 
     @Override
     public FileContentIndexBlock from(ByteBuffer src) {

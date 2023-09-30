@@ -7,13 +7,8 @@ import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 
 import java.nio.channels.SeekableByteChannel;
-import java.util.List;
 
-/**
- * Represents the basic operations available in the file system
- */
-public interface FileSystemOperations {
-
+public interface CrudFileSystemOperations {
     /**
      * Creates a file from a request {@link CreateFileRequest}
      * If a file with this name already exists, it gives an error {@link FileAlreadyExistsException}
@@ -43,19 +38,4 @@ public interface FileSystemOperations {
      * If the file is not found, it gives an error {@link FileNotFoundException}
      */
     void deleteFile(@Nonnull String filename);
-
-    /**
-     * Returns a list of all files in file system
-     */
-    List<String> listFiles();
-
-    /**
-     * Move file
-     *
-     * @param filename    original file name
-     * @param newFilename new file name
-     */
-    void moveFile(String filename, String newFilename);
-
-    String checksum(@Nonnull String filename);
 }

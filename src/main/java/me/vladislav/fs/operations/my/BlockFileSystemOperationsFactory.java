@@ -13,14 +13,14 @@ import javax.annotation.Nonnull;
 
 @Component
 @RequiredArgsConstructor
-public class MyFileSystemOperationsFactory {
+public class BlockFileSystemOperationsFactory {
 
-    private final ObjectProvider<MyFileSystemOperations> objectProvider;
+    private final ObjectProvider<BlockFileSystemOperations> objectProvider;
     private final ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory;
     private final ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory;
 
     @Nonnull
-    public MyFileSystemOperations create(
+    public BlockFileSystemOperations create(
             @Nonnull AllocatedSpace allocatedSpace,
             @Nonnull BlockSize blockSize
     ) {

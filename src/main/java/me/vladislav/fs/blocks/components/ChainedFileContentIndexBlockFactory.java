@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
-import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
+import me.vladislav.fs.blocks.converters.FileContentIndexBlockBytesConverter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 @RequiredArgsConstructor
 public class ChainedFileContentIndexBlockFactory {
 
-    private final FileContentIndexBlockBytesSerializer indexBlockSerializer;
+    private final FileContentIndexBlockBytesConverter indexBlockSerializer;
     private final ObjectProvider<ChainedFileContentIndexBlock> objectProvider;
 
     @Nonnull

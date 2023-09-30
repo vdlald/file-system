@@ -5,7 +5,7 @@ import jakarta.annotation.Nonnull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
-import me.vladislav.fs.operations.FileSystemOperations;
+import me.vladislav.fs.operations.ExtendedFileSystemOperations;
 
 import java.io.Closeable;
 import java.time.ZonedDateTime;
@@ -35,7 +35,7 @@ public class FileSystem implements Closeable {
      */
     @Getter
     @Nonnull
-    private final FileSystemOperations fileSystemOperations;
+    private final ExtendedFileSystemOperations fileSystemOperations;
 
     /**
      * Get the available space, which does not include file system metadata

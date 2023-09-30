@@ -4,11 +4,11 @@ import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.vladislav.fs.FileSystem;
+import me.vladislav.fs.converters.FileSystemMetadataBytesConverter;
 import me.vladislav.fs.exceptions.CreateFileSystemException;
 import me.vladislav.fs.operations.CreateFileSystemOperation;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
-import me.vladislav.fs.serializers.FileSystemMetadataBytesSerializer;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.time.ZonedDateTime;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static me.vladislav.fs.operations.my.MyFileSystemOperations.METHOD_NAME;
+import static me.vladislav.fs.operations.my.BlockFileSystemOperations.METHOD_NAME;
 
 @Slf4j
 @Component
@@ -28,7 +28,7 @@ import static me.vladislav.fs.operations.my.MyFileSystemOperations.METHOD_NAME;
 public class CreateFileSystemOperationImpl implements CreateFileSystemOperation {
 
     private final OpenFileSystemOperation openFileSystemOperation;
-    private final FileSystemMetadataBytesSerializer metadataBytesSerializer;
+    private final FileSystemMetadataBytesConverter metadataBytesSerializer;
 
     @Override
     @Nonnull

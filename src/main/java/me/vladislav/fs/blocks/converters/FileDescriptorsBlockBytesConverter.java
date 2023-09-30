@@ -1,8 +1,8 @@
-package me.vladislav.fs.blocks.serializers;
+package me.vladislav.fs.blocks.converters;
 
 import lombok.RequiredArgsConstructor;
 import me.vladislav.fs.BlockSize;
-import me.vladislav.fs.BytesSerializer;
+import me.vladislav.fs.BytesConverter;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
 import me.vladislav.fs.util.ByteBufferUtils;
@@ -12,9 +12,9 @@ import java.nio.ByteBuffer;
 
 @Component
 @RequiredArgsConstructor
-public class FileDescriptorsBlockBytesSerializer implements BytesSerializer<FileDescriptorsBlock> {
+public class FileDescriptorsBlockBytesConverter implements BytesConverter<FileDescriptorsBlock> {
 
-    private final FileDescriptorBytesSerializer fileDescriptorBytesSerializer;
+    private final FileDescriptorBytesConverter fileDescriptorBytesSerializer;
 
     @Override
     public FileDescriptorsBlock from(ByteBuffer src) {

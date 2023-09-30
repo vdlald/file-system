@@ -17,7 +17,7 @@ import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlock;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlockFactory;
 import me.vladislav.fs.exceptions.FileAlreadyExistsException;
 import me.vladislav.fs.exceptions.FileNotFoundException;
-import me.vladislav.fs.operations.FileSystemOperations;
+import me.vladislav.fs.operations.ExtendedFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @Scope("prototype")
-public class MyFileSystemOperations implements FileSystemOperations {
+public class BlockFileSystemOperations implements ExtendedFileSystemOperations {
 
     public static final String METHOD_NAME = "MYI";
     private static final int FIRST_FILE_DESCRIPTORS_BLOCK_INDEX = 0;
@@ -48,7 +48,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
     private final ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory;
 
     @SuppressWarnings("all")
-    public MyFileSystemOperations(
+    public BlockFileSystemOperations(
             IndexedBlockAllocatedSpace allocatedSpace,
             ChainedFileDescriptorsBlockFactory chainedFileDescriptorsBlockFactory,
             ChainedFileContentIndexBlockFactory chainedFileContentIndexBlockFactory

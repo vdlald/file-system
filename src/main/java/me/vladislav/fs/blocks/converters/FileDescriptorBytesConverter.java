@@ -1,6 +1,6 @@
-package me.vladislav.fs.blocks.serializers;
+package me.vladislav.fs.blocks.converters;
 
-import me.vladislav.fs.BytesSerializer;
+import me.vladislav.fs.BytesConverter;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static me.vladislav.fs.blocks.FileDescriptor.*;
 
 @Component
-public class FileDescriptorBytesSerializer implements BytesSerializer<FileDescriptor> {
+public class FileDescriptorBytesConverter implements BytesConverter<FileDescriptor> {
 
     @Override
     public FileDescriptor from(ByteBuffer src) {

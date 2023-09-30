@@ -1,6 +1,6 @@
 package me.vladislav.fs;
 
-import me.vladislav.fs.operations.my.MyFileSystemOperations;
+import me.vladislav.fs.operations.my.BlockFileSystemOperations;
 import me.vladislav.fs.util.ByteBufferUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ public class IndexedBlockAllocatedSpaceTest extends AbstractFileSystemTest {
     @Test
     @DisplayName("Must write and read block")
     void testWrite() throws IOException {
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         IndexedBlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
 
         assertTrue(ByteBufferUtils.isEmpty(allocatedSpace.readBlock(0)));

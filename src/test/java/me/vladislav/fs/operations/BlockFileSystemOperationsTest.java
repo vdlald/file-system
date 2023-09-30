@@ -4,10 +4,10 @@ import me.vladislav.fs.*;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.blocks.FileDescriptorsBlock;
-import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
-import me.vladislav.fs.blocks.serializers.FileDescriptorsBlockBytesSerializer;
+import me.vladislav.fs.blocks.converters.FileContentIndexBlockBytesConverter;
+import me.vladislav.fs.blocks.converters.FileDescriptorsBlockBytesConverter;
 import me.vladislav.fs.exceptions.FileNotFoundException;
-import me.vladislav.fs.operations.my.MyFileSystemOperations;
+import me.vladislav.fs.operations.my.BlockFileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.CreateFileSystemRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
@@ -22,13 +22,13 @@ import java.nio.channels.SeekableByteChannel;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
+public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
 
     @Autowired
-    private FileContentIndexBlockBytesSerializer indexBlockBytesSerializer;
+    private FileContentIndexBlockBytesConverter indexBlockBytesSerializer;
 
     @Autowired
-    private FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
+    private FileDescriptorsBlockBytesConverter fileDescriptorsBlockBytesSerializer;
 
     @Test
     @DisplayName("File creation / The descriptor must be written")
@@ -37,7 +37,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
         ByteBuffer firstBlock = allocatedSpace.readBlock(0);
         FileDescriptorsBlock descriptors = fileDescriptorsBlockBytesSerializer.from(firstBlock);
@@ -58,7 +58,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
         ByteBuffer firstBlock = allocatedSpace.readBlock(0);
 
@@ -85,7 +85,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
         ByteBuffer firstBlock = allocatedSpace.readBlock(0);
 
@@ -124,7 +124,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
         ByteBuffer firstBlock = allocatedSpace.readBlock(0);
 
@@ -165,7 +165,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         CreateFileRequest request2 = createFileRequest(readCvFile());
         fileSystem.getFileSystemOperations().createFile(request2);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         BlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
         ByteBuffer firstBlock = allocatedSpace.readBlock(0);
 
@@ -230,7 +230,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         SeekableByteChannel read = fsOperations.readFile(request.getFilename());
 
         SeekableByteChannel file = readJbFile();
@@ -250,7 +250,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         String actualChecksum = fsOperations.checksum(request.getFilename());
 
         assertEquals(CAT5_MD5, actualChecksum);
@@ -296,7 +296,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         fsOperations.deleteFile(request.getFilename());
         assertThrows(FileNotFoundException.class, () -> {
             try (SeekableByteChannel file = fsOperations.readFile(request.getFilename())) {
@@ -316,7 +316,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
 
         String filename = request.getFilename();
         UpdateFileRequest updateFileRequest = UpdateFileRequest.builder()
@@ -346,7 +346,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         fileSystem.getFileSystemOperations().createFile(request);
 
-        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
 
         String filename = request.getFilename();
         UpdateFileRequest updateFileRequest = UpdateFileRequest.builder()
@@ -404,7 +404,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         BlockAllocatedSpace cat5 = BlockAllocatedSpace.of(readCat5());
         BlockAllocatedSpace jb = BlockAllocatedSpace.of(readJbFile());
 
-        FileSystemOperations operations = fileSystem.getFileSystemOperations();
+        ExtendedFileSystemOperations operations = fileSystem.getFileSystemOperations();
 
         CreateFileRequest createCat1 = createFileRequest(readCat1());
         operations.createFile(createCat1);

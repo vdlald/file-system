@@ -10,7 +10,7 @@ There should be support for at least:
 [x] deleting
 [x] updating files
 
-[ ] There should be a documented API for working with the file system
+[x] There should be a documented API for working with the file system -- etc/fs_arch.drawio
 [ ] The code must be close to production quality, including tests.
 
 [x] For implementation, please use Java
@@ -73,7 +73,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] P-9. Do not read the last block completely with null bytes
 [x] FR-7. Checksum file
 [x] P-10. Incorrectly handled exception in ArgumentsParser
-[ ] T-31. Write documentation of the memory organization
+[x] T-31. Write documentation of the memory organization
 [x] FR-6. Move the file
 [ ] T-24. Check speed of RW-operations
 

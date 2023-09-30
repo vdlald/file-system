@@ -1,4 +1,4 @@
-package me.vladislav.fs.blocks.serializers;
+package me.vladislav.fs.blocks.converters;
 
 import me.vladislav.fs.AbstractFileSystemTest;
 import me.vladislav.fs.BlockSize;
@@ -15,16 +15,16 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BytesSerializerTest extends AbstractFileSystemTest {
+public class BytesConverterTest extends AbstractFileSystemTest {
 
     @Autowired
-    private FileDescriptorBytesSerializer fileDescriptorBytesSerializer;
+    private FileDescriptorBytesConverter fileDescriptorBytesSerializer;
 
     @Autowired
-    private FileDescriptorsBlockBytesSerializer fileDescriptorsBlockBytesSerializer;
+    private FileDescriptorsBlockBytesConverter fileDescriptorsBlockBytesSerializer;
 
     @Autowired
-    private FileContentIndexBlockBytesSerializer fileContentIndexBlockBytesSerializer;
+    private FileContentIndexBlockBytesConverter fileContentIndexBlockBytesSerializer;
 
     @Test
     @DisplayName("FileDescriptor / Must converting to bytes and from bytes")
