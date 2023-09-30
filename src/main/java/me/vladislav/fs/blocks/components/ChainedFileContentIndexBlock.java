@@ -7,7 +7,6 @@ import me.vladislav.fs.AllocatedSpace;
 import me.vladislav.fs.IndexedBlockAllocatedSpace;
 import me.vladislav.fs.blocks.FileContentIndexBlock;
 import me.vladislav.fs.blocks.serializers.FileContentIndexBlockBytesSerializer;
-import me.vladislav.fs.exceptions.TooBigBlockException;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +31,9 @@ public class ChainedFileContentIndexBlock implements Closeable {
     @Nonnull
     private final FileContentIndexBlock firstBlock;
 
+    @Getter
+    private final long fileSize;
+
     private int currentBlockIndex;
 
     @Nonnull
@@ -45,11 +47,13 @@ public class ChainedFileContentIndexBlock implements Closeable {
 
     @SuppressWarnings("all")
     public ChainedFileContentIndexBlock(
+            long fileSize,
             int firstBlockIndex,
             FileContentIndexBlock firstBlock,
             IndexedBlockAllocatedSpace allocatedSpace,
             FileContentIndexBlockBytesSerializer indexBlockSerializer
     ) {
+        this.fileSize = fileSize;
         this.firstBlock = firstBlock;
         this.allocatedSpace = allocatedSpace;
         this.firstBlockIndex = firstBlockIndex;
@@ -74,21 +78,8 @@ public class ChainedFileContentIndexBlock implements Closeable {
                 break;
             }
         }
-    }
 
-    public void appendBlock(@Nonnull ByteBuffer data) {
-        int blockSize = allocatedSpace.getBlockSize().getBlockSizeInBytes();
-        int remaining = data.remaining();
-        if (remaining > blockSize) {
-            throw new TooBigBlockException(blockSize, remaining);
-        }
-
-        int freeBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
-        while (!currentBlock.addBlockPointer(freeBlock)) {
-            nextIndexBlock();
-        }
-
-        allocatedSpace.writeBlock(freeBlock, data);
+        outSpace.truncate(fileSize);
     }
 
     public void rewriteBlocks(@Nonnull Iterator<ByteBuffer> blocks) {
@@ -143,7 +134,7 @@ public class ChainedFileContentIndexBlock implements Closeable {
         currentBlockIndex = firstBlockIndex;
     }
 
-    private FileContentIndexBlock nextIndexBlock() {
+    private void nextIndexBlock() {
         ByteBuffer buffer = indexBlockSerializer.toByteBuffer(currentBlock);
         allocatedSpace.writeBlock(currentBlockIndex, buffer);
 
@@ -160,7 +151,6 @@ public class ChainedFileContentIndexBlock implements Closeable {
             currentBlockIndex = allocatedBlock;
             currentBlock = new FileContentIndexBlock();
         }
-        return currentBlock;
     }
 
     @Override

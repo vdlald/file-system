@@ -109,6 +109,20 @@ public class AbstractFileSystemTest {
         }
     }
 
+    protected void assertChannelsContentEquals(
+            SeekableByteChannel expected,
+            SeekableByteChannel actual
+    ) throws IOException {
+        int read = 0;
+        do {
+            ByteBuffer buffer1 = ByteBuffer.allocate(KB_8);
+            ByteBuffer buffer2 = ByteBuffer.allocate(KB_8);
+            assertEquals(expected.read(buffer1), actual.read(buffer2));
+            assertEquals(buffer1.rewind(), buffer2.rewind());
+            read += KB_8;
+        } while (expected.size() > read);
+    }
+
     protected SeekableByteChannel readCat1() throws IOException {
         return readFile("/files/cat1.webp");
     }

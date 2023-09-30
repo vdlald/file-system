@@ -130,6 +130,14 @@ public class AllocatedSpace implements Closeable {
         return this;
     }
 
+    public void truncate(long size) {
+        try {
+            data.truncate(size);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Checks if the position in the channel is outside the channel boundary
      */

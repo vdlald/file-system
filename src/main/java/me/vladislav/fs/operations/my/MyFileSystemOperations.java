@@ -76,10 +76,17 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
         log.debug("find file descriptor block with free space");
 
+        long fileSize;
+        try {
+            fileSize = createFileRequest.getContent().size();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         int fileIndexBlock = allocatedSpace.getFreeBlockIndexAndMarkAsAllocated();
         FileDescriptor fileDescriptor = FileDescriptor.builder()
                 .filename(filename)
                 .fileBlockIndex(fileIndexBlock)
+                .fileSize(fileSize)
                 .build();
         descriptorChain.addFileDescriptor(fileDescriptor);
         log.debug("save file descriptor in block: {}", descriptorChain.getCurrentBlockIndex());
@@ -93,15 +100,14 @@ public class MyFileSystemOperations implements FileSystemOperations {
                 .build())
                 .block(0);
 
-        ChainedFileContentIndexBlock chainIndex = chainedFileContentIndexBlockFactory.create(
-                fileIndexBlock, firstIndexBlock, allocatedSpace);
+        ChainedFileContentIndexBlock contentChain = chainedFileContentIndexBlockFactory.create(
+                fileSize, fileIndexBlock, firstIndexBlock, allocatedSpace);
 
         log.debug("write file content in fs");
-        while (content.hasNextBlock()) {
-            chainIndex.appendBlock(content.readBlock());
-        }
+        Iterator<ByteBuffer> contentIterator = content.contentIterator();
+        contentChain.rewriteBlocks(contentIterator);
 
-        chainIndex.close();
+        contentChain.close();
         try {
             createFileRequest.getContent().close();
         } catch (IOException e) {
@@ -124,7 +130,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
         }
 
         ChainedFileContentIndexBlock contentChain = chainedFileContentIndexBlockFactory.create(
-                fileDescriptor.getFileBlockIndex(), allocatedSpace);
+                fileDescriptor, allocatedSpace);
 
         contentChain.readAllBlocks(channel);
         try {
@@ -153,7 +159,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
         log.debug("get file index block");
         ChainedFileContentIndexBlock contentChain = chainedFileContentIndexBlockFactory.create(
-                fileDescriptor.getFileBlockIndex(), allocatedSpace);
+                fileDescriptor, allocatedSpace);
 
         log.debug("update file content");
         Iterator<ByteBuffer> contentIterator = content.contentIterator();

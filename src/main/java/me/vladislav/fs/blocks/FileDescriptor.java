@@ -8,9 +8,10 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class FileDescriptor {
 
-    public static final int FILENAME_SIZE = 60;
+    public static final int FILENAME_SIZE = 52;
+    public static final int FILE_SIZE = 8;
     public static final int FILE_BLOCK_INDEX_SIZE = 4;
-    public static final int TOTAL_SIZE = FILENAME_SIZE + FILE_BLOCK_INDEX_SIZE;
+    public static final int TOTAL_SIZE = FILENAME_SIZE + FILE_BLOCK_INDEX_SIZE + FILE_SIZE;
 
     @Setter
     @Getter
@@ -19,4 +20,7 @@ public class FileDescriptor {
 
     @Getter
     private final int fileBlockIndex;
+
+    @Getter
+    private final long fileSize;
 }

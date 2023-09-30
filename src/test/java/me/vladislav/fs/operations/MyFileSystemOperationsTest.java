@@ -47,6 +47,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
         FileDescriptor descriptor = descriptors.getDescriptor(0);
         assertNotNull(descriptor);
         assertEquals(request.getFilename(), descriptor.getFilename());
+        assertEquals(1, descriptor.getFileSize());
     }
 
     @Test
@@ -234,19 +235,7 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
 
         SeekableByteChannel file = readJbFile();
 
-        BlockAllocatedSpace expectedBlocks = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
-                .data(file)
-                .build());
-
-        BlockAllocatedSpace actualBlocks = new BlockAllocatedSpace(BlockSize.KB_4, AllocatedSpace.builder()
-                .data(read)
-                .build());
-
-        for (int i = 0; i < expectedBlocks.getBlocksAmount(); i++) {
-            ByteBuffer expected = expectedBlocks.readBlock(i);
-            ByteBuffer actual = actualBlocks.readBlock(i);
-            assertEquals(expected, actual);
-        }
+        assertChannelsContentEquals(file, read);
         file.close();
         fileSystem.close();
     }

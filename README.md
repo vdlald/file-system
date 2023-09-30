@@ -70,13 +70,14 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-29. Extract interfaces
 [x] T-27. Exception handling in ArgumentsApi
 [x] T-30. Refactor exceptions
+[x] P-9. Do not read the last block completely with null bytes
 [ ] T-31. Write documentation of the memory organization
 [x] FR-6. Move the file
 [ ] T-24. Check speed of RW-operations
 
 [ ] P-2. FS initial max size is only 2GB
 [ ] P-5. readBlocks can not allocate more than Integer.MAX bytes
-[ ] P-6. Primitive collections are not used
+[ ] P-8. Primitive collections are not used
 [ ] T-20. Work with different block sizes
 
 [ ] FR-1. Compress data
