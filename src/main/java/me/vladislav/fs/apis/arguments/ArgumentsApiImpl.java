@@ -91,6 +91,13 @@ public class ArgumentsApiImpl implements ArgumentsApi {
                     .filename(arguments.filename())
                     .newFilename(arguments.newFilename())
                     .build());
+            case OPERATION_MD5_CHECKSUM -> {
+                String checksum = md5ChecksumFile(Md5ChecksumFileRequest.builder()
+                        .fsPath(arguments.fileSystemPath())
+                        .filename(arguments.filename())
+                        .build());
+                System.out.println(checksum);
+            }
             default -> throw new UnknownOperationException(operation);
         }
     }
@@ -144,5 +151,10 @@ public class ArgumentsApiImpl implements ArgumentsApi {
     @Override
     public void moveFile(@Nonnull MoveFileRequest request) {
         javaApi.moveFile(request);
+    }
+
+    @Override
+    public String md5ChecksumFile(@Nonnull Md5ChecksumFileRequest request) {
+        return javaApi.md5ChecksumFile(request);
     }
 }

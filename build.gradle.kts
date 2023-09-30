@@ -38,6 +38,7 @@ dependencies {
     implementation("com.google.guava:guava:32.1.2-jre")
     implementation("net.sf.trove4j:trove4j:3.0.3")
     implementation("org.apache.commons:commons-compress:1.24.0")
+    implementation("commons-codec:commons-codec:1.16.0")
 }
 
 tasks.withType<Test> {

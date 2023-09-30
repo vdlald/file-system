@@ -74,4 +74,11 @@ public class JavaApiImpl implements JavaApi {
             fileSystem.getFileSystemOperations().moveFile(request.getFilename(), request.getNewFilename());
         }
     }
+
+    @Override
+    public String md5ChecksumFile(@Nonnull Md5ChecksumFileRequest request) {
+        try (FileSystem fileSystem = openFileSystemOperation.open(request.getFsPath())) {
+            return fileSystem.getFileSystemOperations().checksum(request.getFilename());
+        }
+    }
 }

@@ -21,6 +21,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.UUID;
 
 import static java.nio.file.StandardOpenOption.READ;
@@ -34,6 +35,8 @@ public class AbstractFileSystemTest {
     public static final int KB_8 = 1024 * 8;
     public static final int MB_1 = 1048576;
     public static final int MB_8 = MB_1 * 8;
+
+    public static final String CAT5_MD5 = "86adc15f5f2aec4fab91b7ff19128e65";
 
     @Autowired
     protected OpenFileSystemOperation openFileSystemOperation;
@@ -87,6 +90,18 @@ public class AbstractFileSystemTest {
         Path tempFile = Files.createTempFile("temp", "suff");
         SeekableByteChannel seekableByteChannel = Files.newByteChannel(tempFile, READ, WRITE);
         seekableByteChannel.write(ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8)));
+        return new TempFile(tempFile, seekableByteChannel.position(0));
+    }
+
+    protected TempFile createTempFile(SeekableByteChannel fromChannel) throws IOException {
+        Path tempFile = Files.createTempFile("temp", "suff");
+        SeekableByteChannel seekableByteChannel = Files.newByteChannel(tempFile, READ, WRITE);
+
+        Iterator<ByteBuffer> iterator = BlockAllocatedSpace.of(fromChannel).contentIterator();
+        while (iterator.hasNext()) {
+            seekableByteChannel.write(iterator.next());
+        }
+
         return new TempFile(tempFile, seekableByteChannel.position(0));
     }
 

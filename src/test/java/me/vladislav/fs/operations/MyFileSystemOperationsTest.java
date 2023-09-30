@@ -241,6 +241,24 @@ public class MyFileSystemOperationsTest extends AbstractFileSystemTest {
     }
 
     @Test
+    @DisplayName("File create and checksum / cat5.jpg")
+    void testCreateAndChecksum() throws Exception {
+        FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
+                .withBlockSize(BlockSize.KB_4));
+
+        CreateFileRequest request = createFileRequest(readCat5());
+
+        fileSystem.getFileSystemOperations().createFile(request);
+
+        MyFileSystemOperations fsOperations = (MyFileSystemOperations) fileSystem.getFileSystemOperations();
+        String actualChecksum = fsOperations.checksum(request.getFilename());
+
+        assertEquals(CAT5_MD5, actualChecksum);
+
+        fileSystem.close();
+    }
+
+    @Test
     @DisplayName("File read, and create, and reopen fs / Small file")
     void testCreateAndReadSmallFile() throws Exception {
         CreateFileSystemRequest fsRequest = getCreateFileSystemRequest()

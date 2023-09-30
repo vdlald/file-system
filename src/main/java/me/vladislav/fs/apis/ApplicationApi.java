@@ -22,9 +22,12 @@ public interface ApplicationApi extends CrudApplicationApi {
     List<String> listFiles(@Nonnull ListFilesRequest request);
 
     /**
-     *
+     * Right now it works just as a file renaming, but in the future here will be a complete move from one location
+     * to another
      */
     void moveFile(@Nonnull MoveFileRequest request);
+
+    String md5ChecksumFile(@Nonnull Md5ChecksumFileRequest request);
 
     @Getter
     @Builder
@@ -82,5 +85,23 @@ public interface ApplicationApi extends CrudApplicationApi {
          */
         @Nonnull
         private final String newFilename;
+    }
+
+    @Getter
+    @Builder
+    class Md5ChecksumFileRequest {
+
+        /**
+         * Path to the file system
+         */
+        @Nonnull
+        private final Path fsPath;
+
+        /**
+         * Original filename
+         */
+        @Nonnull
+        private final String filename;
+
     }
 }

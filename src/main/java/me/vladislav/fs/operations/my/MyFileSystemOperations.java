@@ -20,6 +20,8 @@ import me.vladislav.fs.exceptions.FileNotFoundException;
 import me.vladislav.fs.operations.FileSystemOperations;
 import me.vladislav.fs.requests.CreateFileRequest;
 import me.vladislav.fs.requests.UpdateFileRequest;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.compress.utils.BoundedSeekableByteChannelInputStream;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -179,6 +181,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
         }
     }
 
+    @Override
     public List<String> listFiles() {
         log.info("listing files");
 
@@ -191,7 +194,7 @@ public class MyFileSystemOperations implements FileSystemOperations {
     }
 
     @Override
-    public void moveFile(String filename, String newFilename) {
+    public void moveFile(@Nonnull String filename, @Nonnull String newFilename) {
         ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
                 FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
 
@@ -206,5 +209,16 @@ public class MyFileSystemOperations implements FileSystemOperations {
 
         fileDescriptor.setFilename(newFilename);
         descriptorChain.saveCurrentBlock();
+    }
+
+    @Override
+    public String checksum(@Nonnull String filename) {
+        SeekableByteChannel file = readFile(filename);
+
+        try {
+            return DigestUtils.md5Hex(new BoundedSeekableByteChannelInputStream(0, file.size(), file));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -11,6 +11,7 @@ public interface ArgumentsApi extends ApplicationRunner, ApplicationApi {
     String OPERATION_DELETE_FILE = "delete-file";
     String OPERATION_LIST_FILES = "list-files";
     String OPERATION_MOVE_FILE = "move-file";
+    String OPERATION_MD5_CHECKSUM = "md5-checksum";
 
     class ArgumentsApiException extends RuntimeException {
         public ArgumentsApiException(Throwable cause) {

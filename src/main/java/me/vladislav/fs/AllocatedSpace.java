@@ -69,7 +69,10 @@ public class AllocatedSpace implements Closeable {
     public ByteBuffer read(int amountOfBytes) {
         try {
             ByteBuffer allocate = ByteBuffer.allocate(amountOfBytes);
-            data.read(allocate);
+            int read = data.read(allocate);
+            if (read > 0) {
+                allocate.limit(read);
+            }
             return allocate.rewind();
         } catch (IOException e) {
             throw new RuntimeException(e);

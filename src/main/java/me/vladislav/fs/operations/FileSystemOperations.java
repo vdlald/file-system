@@ -56,4 +56,6 @@ public interface FileSystemOperations {
      * @param newFilename new file name
      */
     void moveFile(String filename, String newFilename);
+
+    String checksum(@Nonnull String filename);
 }
