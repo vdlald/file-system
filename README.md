@@ -72,7 +72,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] T-30. Refactor exceptions
 [x] P-9. Do not read the last block completely with null bytes
 [x] FR-7. Checksum file
-[ ] P-10. Incorrectly handled exception in ArgumentsParser
+[x] P-10. Incorrectly handled exception in ArgumentsParser
 [ ] T-31. Write documentation of the memory organization
 [x] FR-6. Move the file
 [ ] T-24. Check speed of RW-operations

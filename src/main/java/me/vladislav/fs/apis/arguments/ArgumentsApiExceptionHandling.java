@@ -16,7 +16,9 @@ import java.io.PrintStream;
 @Component
 public class ArgumentsApiExceptionHandling {
 
-    @Pointcut("execution(public * me.vladislav.fs.apis.ApplicationApi.*(..))")
+    protected static final String FILE_ST_NAME = "error.stacktrace";
+
+    @Pointcut("execution(public * me.vladislav.fs.apis.ArgumentsApi.*(..))")
     private void argumentsApiPointCut() {
     }
 
@@ -27,7 +29,7 @@ public class ArgumentsApiExceptionHandling {
         } catch (Throwable t) {
             System.err.println(t.getMessage());
 
-            FileOutputStream errorFile = new FileOutputStream("error.stacktrace", true);
+            FileOutputStream errorFile = new FileOutputStream(FILE_ST_NAME, true);
             PrintStream errorStream = new PrintStream(errorFile);
 
             t.printStackTrace(errorStream);
