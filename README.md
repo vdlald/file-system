@@ -82,6 +82,7 @@ There should be support for at least:
 * [x] T-32. Write more tests for ArgumentsApi
 * [x] T-33. Update arguments_help.md
 * [x] T-34. Wrap the application in an executable file
+* [x] P-11. Limit filename size
 * [ ] T-35. Refactor requests package
 * [ ] T-36. Check the resources to be closed
 * [ ] T-24. Check speed of RW-operations

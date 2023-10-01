@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import me.vladislav.fs.apis.ArgumentsApi.ArgumentsApiException;
+import me.vladislav.fs.blocks.FileDescriptor;
 import me.vladislav.fs.exceptions.IsNotFileException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.context.annotation.Scope;
@@ -56,11 +57,21 @@ public class ArgumentsParser {
     }
 
     public String filename() {
-        return singleRequiredArgument(ARG_FILENAME);
+        String name = singleRequiredArgument(ARG_FILENAME);
+        if (name.length() > FileDescriptor.FILENAME_SIZE) {
+            throw new ArgumentValidationException(
+                    ARG_FILENAME, "filename limit is %s".formatted(FileDescriptor.FILENAME_SIZE));
+        }
+        return name;
     }
 
     public String newFilename() {
-        return singleRequiredArgument(ARG_NEW_FILENAME);
+        String name = singleRequiredArgument(ARG_NEW_FILENAME);
+        if (name.length() > FileDescriptor.FILENAME_SIZE) {
+            throw new ArgumentValidationException(
+                    ARG_FILENAME, "filename limit is %s".formatted(FileDescriptor.FILENAME_SIZE));
+        }
+        return name;
     }
 
     public SeekableByteChannel fileIn() {
