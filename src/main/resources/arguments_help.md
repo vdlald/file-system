@@ -32,6 +32,13 @@ The utility allows you to create and manage a file system (fs) in a single file.
              When creating a file, allows you to specify the name of the file to 
              be created, and in other cases indicates the file in the file system 
              to be operated on
+     
+     --new-filename=path
+             Defines what the new file name will be 
+
+     --file-out=path
+             Determines where the content of the read-file will be written during 
+             the "read-file" operation
 
      --file-in=path
              Allows you to specify from which file to read content when creating 
@@ -56,3 +63,10 @@ The command:
 
      a file "cat1.png" will be created in the "./filesystem" file system with 
      content from the "../cat1.png" file.
+    
+     The command:
+           
+           sfs --operation=read-file --fs=./filesystem --filename=some --file-out=out
+
+     Reads a file from a file system named "some" and writes its content to a file outside the 
+     file system named "out"
