@@ -18,7 +18,7 @@ public class AllocatedSpaceTest extends AbstractFileSystemTest {
 
     @Test
     @DisplayName("Must write and read")
-    void testRW() throws IOException {
+    void testRW() {
         AllocatedSpace allocatedSpace = fileSystem.getAllocatedSpace();
 
         assertIsEmpty(allocatedSpace.position(0).read(100));

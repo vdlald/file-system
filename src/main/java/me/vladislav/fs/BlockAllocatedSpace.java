@@ -105,6 +105,7 @@ public class BlockAllocatedSpace implements Closeable {
         return this;
     }
 
+    @SuppressWarnings("unused")
     public long size() {
         return allocatedSpace.size();
     }

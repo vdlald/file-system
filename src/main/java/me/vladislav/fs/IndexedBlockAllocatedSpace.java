@@ -60,6 +60,8 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
             freeBlock = blocksAmount;
         }
 
+        lastFreeBlockIndex = freeBlock;
+
         return freeBlock;
     }
 
@@ -71,6 +73,7 @@ public class IndexedBlockAllocatedSpace extends BlockAllocatedSpace {
         allocatedIndex.set(blockIndex, true);
     }
 
+    @SuppressWarnings("unused")
     public IntStream getFreeBlocksIndexStream() {
         return IntStream.generate(this::getFreeBlockIndex);
     }

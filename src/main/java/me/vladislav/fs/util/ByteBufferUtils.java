@@ -44,6 +44,7 @@ public class ByteBufferUtils {
         return new String(b, StandardCharsets.UTF_8);
     }
 
+    @SuppressWarnings("unused")
     public static ByteBuffer readWholeChannel(SeekableByteChannel seekableByteChannel) throws IOException {
         ByteBuffer allocate = ByteBuffer.allocate((int) seekableByteChannel.size());
         seekableByteChannel.read(allocate);

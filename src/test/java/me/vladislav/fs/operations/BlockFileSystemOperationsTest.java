@@ -214,6 +214,7 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
     }
 
     @Test
+    @SuppressWarnings("EmptyTryBlock")
     @DisplayName("File create and delete / Big big file")
     void testCreateAndDelete() throws Exception {
         FileSystem fileSystem = createFileSystemOperation.createFileSystem(getCreateFileSystemRequest()
@@ -226,7 +227,7 @@ public class BlockFileSystemOperationsTest extends AbstractFileSystemTest {
         BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         fsOperations.deleteFile(request.getFilename());
         assertThrows(FileNotFoundException.class, () -> {
-            try (SeekableByteChannel file = fsOperations.readFile(request.getFilename())) {
+            try (SeekableByteChannel ignored = fsOperations.readFile(request.getFilename())) {
             }
         });
 

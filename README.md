@@ -32,7 +32,7 @@ There should be support for at least:
   File system should not have a hard size limit but let’s assume that users won’t stress it beyond some reasonable
   limits
 
-* [x] Q-4. The result should be a mini library? Or assume it's part of the application and I can use spring and so on?
+* [x] Q-4. The result should be a mini library? Or assume it's part of the application, and I can use spring and so on?
   It would be great to see a console app, but Java interface with Javadoc will be sufficient
 
 * [x] Q-5. Should the file system be hierarchical?

@@ -16,6 +16,7 @@ public class Utils {
 
     @FunctionalInterface
     public interface Supplier<T> {
+        @SuppressWarnings("RedundantThrows")
         T produce() throws Exception;
     }
 }

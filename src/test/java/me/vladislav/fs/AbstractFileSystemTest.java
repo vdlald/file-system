@@ -79,13 +79,14 @@ public class AbstractFileSystemTest {
                 .build();
     }
 
-    protected CreateFileRequest createFileRequest(SeekableByteChannel file) throws IOException {
+    protected CreateFileRequest createFileRequest(SeekableByteChannel file) {
         return CreateFileRequest.builder()
                 .filename(UUID.randomUUID().toString())
                 .content(file)
                 .build();
     }
 
+    @SuppressWarnings("resource")
     protected TempFile createTempFile(String content) throws IOException {
         Path tempFile = Files.createTempFile("temp", "suff");
         SeekableByteChannel seekableByteChannel = Files.newByteChannel(tempFile, READ, WRITE);
@@ -93,6 +94,7 @@ public class AbstractFileSystemTest {
         return new TempFile(tempFile, seekableByteChannel.position(0));
     }
 
+    @SuppressWarnings("resource")
     protected TempFile createTempFile(SeekableByteChannel fromChannel) throws IOException {
         Path tempFile = Files.createTempFile("temp", "suff");
         SeekableByteChannel seekableByteChannel = Files.newByteChannel(tempFile, READ, WRITE);

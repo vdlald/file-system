@@ -40,6 +40,7 @@ public class FileSystem implements Closeable {
     /**
      * Get the available space, which does not include file system metadata
      */
+    @SuppressWarnings("unused")
     public AllocatedSpace getUsableAllocatedSpace() {
         return allocatedSpace.withStartOffset(Metadata.TOTAL_SIZE);
     }

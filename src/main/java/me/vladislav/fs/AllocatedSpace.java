@@ -1,6 +1,5 @@
 package me.vladislav.fs;
 
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import lombok.Builder;
 
@@ -39,6 +38,7 @@ public class AllocatedSpace implements Closeable {
         }
     }
 
+    @SuppressWarnings("unused")
     public boolean isOpen() {
         return data.isOpen();
     }
@@ -52,12 +52,7 @@ public class AllocatedSpace implements Closeable {
         }
     }
 
-    @Nonnull
-    @VisibleForTesting
-    SeekableByteChannel getData() {
-        return data;
-    }
-
+    @SuppressWarnings("unused")
     @Nonnull
     public String readInString(int amountOfBytes) {
         ByteBuffer buffer = ByteBuffer.allocate(amountOfBytes);
@@ -80,7 +75,7 @@ public class AllocatedSpace implements Closeable {
     }
 
     public int read(@Nonnull ByteBuffer dst) {
-        int read = 0;
+        int read;
         try {
             read = data.read(dst);
         } catch (IOException e) {
@@ -109,6 +104,7 @@ public class AllocatedSpace implements Closeable {
         }
     }
 
+    @SuppressWarnings("unused")
     public long position() {
         try {
             return data.position() - startOffset;

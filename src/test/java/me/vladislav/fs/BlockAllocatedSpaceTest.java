@@ -21,7 +21,7 @@ public class BlockAllocatedSpaceTest extends AbstractFileSystemTest {
 
     @Test
     @DisplayName("Read block")
-    void testReadBlock() throws Exception {
+    void testReadBlock() {
         AllocatedSpace allocatedSpace = fileSystem.getAllocatedSpace()
                 .withStartOffset(FileSystem.Metadata.TOTAL_SIZE);
 
@@ -45,7 +45,7 @@ public class BlockAllocatedSpaceTest extends AbstractFileSystemTest {
 
     @Test
     @DisplayName("Write block")
-    void testWriteBlock() throws Exception {
+    void testWriteBlock() {
         AllocatedSpace allocatedSpace = fileSystem.getAllocatedSpace()
                 .withStartOffset(FileSystem.Metadata.TOTAL_SIZE);
 

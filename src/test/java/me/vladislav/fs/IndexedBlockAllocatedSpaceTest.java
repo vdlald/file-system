@@ -17,7 +17,7 @@ public class IndexedBlockAllocatedSpaceTest extends AbstractFileSystemTest {
 
     @Test
     @DisplayName("Must write and read block")
-    void testWrite() throws IOException {
+    void testWrite() {
         BlockFileSystemOperations fsOperations = (BlockFileSystemOperations) fileSystem.getFileSystemOperations();
         IndexedBlockAllocatedSpace allocatedSpace = fsOperations.getAllocatedSpace();
 
