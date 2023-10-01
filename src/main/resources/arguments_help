@@ -1,11 +1,11 @@
 NAME
-sfs – file system in a single file
+     sfs – file system in a single file
 
 SYNOPSIS
-sfs [--operation=what_to_do] [--fs=path] [--init-size=num] [--filename=path] [--file-in=path]
+     sfs [--operation=what_to_do] [--fs=path] [--init-size=num] [--filename=path] [--file-in=path]
 
 DESCRIPTION
-The utility allows you to create and manage a file system (fs) in a single file.
+     The utility allows you to create and manage a file system (fs) in a single file.
 
      The options are as follows:
 
@@ -45,13 +45,13 @@ The utility allows you to create and manage a file system (fs) in a single file.
              a file in the file system
 
 EXIT STATUS
-The sfs utility exits with one of the following values:
+     The sfs utility exits with one of the following values:
 
      0     Operation successfully completed.
      >0    An error occurred.
 
 EXAMPLES
-The command:
+     The command:
 
            sfs --operation=create-file-system --fs=./filesystem
 

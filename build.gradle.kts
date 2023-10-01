@@ -8,6 +8,8 @@ plugins {
 
 group = "me.vladislav"
 version = "0.0.1-SNAPSHOT"
+val outName: String = "${rootProject.name}-$version.jar"
+val bashExecutable: String = "sfs"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -48,3 +50,20 @@ tasks.withType<Test> {
 tasks.named<BootJar>("bootJar") {
     launchScript()
 }
+
+val bootJar: BootJar = tasks.bootJar.get()
+
+val makeBashExecutableBin: Exec = tasks.register<Exec>("makeBashExecutableBin") {
+    dependsOn(bootJar)
+    group = "build"
+    workingDir(bootJar.destinationDirectory.get())
+    commandLine(
+        "sh", "-c", "echo '#!/usr/bin/java -jar' > $bashExecutable | " +
+                "cat $outName >> $bashExecutable | " +
+                "chmod +x $bashExecutable"
+    )
+}.get()
+
+val build: DefaultTask = tasks.build.get()
+
+build.dependsOn(makeBashExecutableBin)

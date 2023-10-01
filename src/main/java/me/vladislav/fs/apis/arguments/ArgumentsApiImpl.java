@@ -131,7 +131,7 @@ public class ArgumentsApiImpl implements ArgumentsApi {
     }
 
     private void printHelp() {
-        System.out.println(ResourceUtils.getResourceAsString("/arguments_help.md"));
+        System.out.println(ResourceUtils.getResourceAsString("/arguments_help"));
     }
 
     @Override

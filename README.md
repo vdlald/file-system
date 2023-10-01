@@ -77,6 +77,7 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] FR-6. Move the file
 [x] T-32. Write more tests for ArgumentsApi
 [x] T-33. Update arguments_help.md
+[x] T-34. Wrap the application in an executable file
 [ ] T-24. Check speed of RW-operations
 
 [ ] P-2. FS initial max size is only 2GB
