@@ -11,7 +11,7 @@ There should be support for at least:
 [x] updating files
 
 [x] There should be a documented API for working with the file system -- etc/fs_arch.drawio
-[ ] The code must be close to production quality, including tests.
+[x] The code must be close to production quality, including tests.
 
 [x] For implementation, please use Java
 [x] Preferably, please do not use any third-party libraries for the implementation of file storage itself.
