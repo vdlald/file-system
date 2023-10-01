@@ -2,9 +2,9 @@ package me.vladislav.fs.apis.java;
 
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
+import me.vladislav.fs.FileDescription;
 import me.vladislav.fs.FileSystem;
 import me.vladislav.fs.apis.JavaApi;
-import me.vladislav.fs.blocks.view.FileDescription;
 import me.vladislav.fs.operations.CreateFileSystemOperation;
 import me.vladislav.fs.operations.OpenFileSystemOperation;
 import org.springframework.stereotype.Component;

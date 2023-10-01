@@ -1,4 +1,4 @@
-package me.vladislav.fs.blocks.view;
+package me.vladislav.fs;
 
 import lombok.Builder;
 import lombok.Getter;

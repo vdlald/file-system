@@ -83,6 +83,7 @@ There should be support for at least:
 * [x] T-33. Update arguments_help.md
 * [x] T-34. Wrap the application in an executable file
 * [ ] T-35. Refactor requests package
+* [ ] T-36. Check the resources to be closed
 * [ ] T-24. Check speed of RW-operations
 
 * [ ] P-2. FS initial max size is only 2GB

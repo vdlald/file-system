@@ -1,7 +1,7 @@
 package me.vladislav.fs.operations;
 
 import jakarta.annotation.Nonnull;
-import me.vladislav.fs.blocks.view.FileDescription;
+import me.vladislav.fs.FileDescription;
 
 import java.util.List;
 

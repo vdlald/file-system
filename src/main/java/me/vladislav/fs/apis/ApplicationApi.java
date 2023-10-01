@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.With;
 import me.vladislav.fs.BlockSize;
-import me.vladislav.fs.blocks.view.FileDescription;
+import me.vladislav.fs.FileDescription;
 
 import java.nio.file.Path;
 import java.util.List;
