@@ -15,6 +15,7 @@ import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlock;
 import me.vladislav.fs.blocks.components.ChainedFileContentIndexBlockFactory;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlock;
 import me.vladislav.fs.blocks.components.ChainedFileDescriptorsBlockFactory;
+import me.vladislav.fs.blocks.view.FileDescription;
 import me.vladislav.fs.exceptions.FileAlreadyExistsException;
 import me.vladislav.fs.exceptions.FileNotFoundException;
 import me.vladislav.fs.operations.ExtendedFileSystemOperations;
@@ -189,14 +190,17 @@ public class BlockFileSystemOperations implements ExtendedFileSystemOperations {
     }
 
     @Override
-    public List<String> listFiles() {
+    public List<FileDescription> listFiles() {
         log.info("listing files");
 
         ChainedFileDescriptorsBlock descriptorChain = chainedFileDescriptorsBlockFactory.create(
                 FIRST_FILE_DESCRIPTORS_BLOCK_INDEX, allocatedSpace);
 
         return descriptorChain.getAllDescriptors().stream()
-                .map(FileDescriptor::getFilename)
+                .map(descriptor -> FileDescription.builder()
+                        .filename(descriptor.getFilename())
+                        .fileSize(descriptor.getFileSize())
+                        .build())
                 .collect(Collectors.toList());
     }
 

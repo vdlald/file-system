@@ -17,6 +17,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.nio.file.StandardOpenOption.READ;
 import static org.junit.jupiter.api.Assertions.*;
@@ -211,6 +214,84 @@ public class ArgumentsApiImplTest extends AbstractFileSystemTest {
         argumentsApi.run(readFile);
 
 
-        assertChannelsContentEquals(outTemp.content().position(0), Files.newByteChannel(updTempFile.path()));
+        SeekableByteChannel content = outTemp.content();
+        assertChannelsContentEquals(content.position(0), Files.newByteChannel(updTempFile.path()));
+        content.close();
+    }
+
+    @Test
+    @DisplayName("The file must be deleted")
+    void testDelete() throws Exception {
+        Path fsPath = createFSRequest.getWhereToStore();
+        TempFile tempFile = createTempFile("some content");
+
+        ApplicationArguments createFile = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=create-file",
+                "--file-in=" + tempFile.path(),
+                "--filename=file"
+        );
+        argumentsApi.run(createFile);
+
+        ApplicationArguments deleteFile = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=delete-file",
+                "--filename=file"
+        );
+        argumentsApi.run(deleteFile);
+
+        TempFile outTemp = createTempFile("");
+        ApplicationArguments readFile = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=read-file",
+                "--file-out=" + outTemp.path(),
+                "--filename=file"
+        );
+        argumentsApi.run(readFile);
+
+
+        String actual = ByteBufferUtils.readToString(BlockAllocatedSpace.of(Files.newByteChannel(tempErr)).readBlock());
+        assertEquals("not found file with name - file\n", actual);
+    }
+
+    @Test
+    @DisplayName("All files must be listed")
+    void testList() throws Exception {
+        Path fsPath = createFSRequest.getWhereToStore();
+
+        for (int i = 0; i < 5; i++) {
+            String content = IntStream.range(0, i).mapToObj(Objects::toString).collect(Collectors.joining());
+            TempFile tempFile = createTempFile("some content: " + content);
+            ApplicationArguments createFile = new DefaultApplicationArguments(
+                    "--fs=" + fsPath,
+                    "--operation=create-file",
+                    "--file-in=" + tempFile.path(),
+                    "--filename=file" + i
+            );
+            argumentsApi.run(createFile);
+        }
+
+        ApplicationArguments deleteFiles = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=delete-file",
+                "--filename=file0"
+        );
+        argumentsApi.run(deleteFiles);
+
+        ApplicationArguments listFiles = new DefaultApplicationArguments(
+                "--fs=" + fsPath,
+                "--operation=list-files",
+                "--filename=file"
+        );
+        argumentsApi.run(listFiles);
+
+        String actual = ByteBufferUtils.readToString(BlockAllocatedSpace.of(Files.newByteChannel(tempOut)).readBlock());
+        String expected = """
+                file1 15Bytes
+                file2 16Bytes
+                file3 17Bytes
+                file4 18Bytes
+                """;
+        assertEquals(expected, actual);
     }
 }

@@ -1,6 +1,7 @@
 package me.vladislav.fs.operations;
 
 import jakarta.annotation.Nonnull;
+import me.vladislav.fs.blocks.view.FileDescription;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface ExtendedFileSystemOperations extends CrudFileSystemOperations {
     /**
      * Returns a list of all files in file system
      */
-    List<String> listFiles();
+    List<FileDescription> listFiles();
 
     /**
      * Move file

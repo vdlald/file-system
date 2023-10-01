@@ -75,7 +75,8 @@ As for the fast write/fast read - let’s assume that we want balance between re
 [x] P-10. Incorrectly handled exception in ArgumentsParser
 [x] T-31. Write documentation of the memory organization
 [x] FR-6. Move the file
-[ ] T-32. Write more tests for ArgumentsApi
+[x] T-32. Write more tests for ArgumentsApi
+[ ] T-33. Update arguments_help.md
 [ ] T-24. Check speed of RW-operations
 
 [ ] P-2. FS initial max size is only 2GB

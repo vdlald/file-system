@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.With;
 import me.vladislav.fs.BlockSize;
+import me.vladislav.fs.blocks.view.FileDescription;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -19,7 +20,7 @@ public interface ApplicationApi extends CrudApplicationApi {
     /**
      * List files in file system
      */
-    List<String> listFiles(@Nonnull ListFilesRequest request);
+    List<FileDescription> listFiles(@Nonnull ListFilesRequest request);
 
     /**
      * Right now it works just as a file renaming, but in the future here will be a complete move from one location

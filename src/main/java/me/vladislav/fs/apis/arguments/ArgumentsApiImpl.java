@@ -8,6 +8,7 @@ import me.vladislav.fs.BlockSize;
 import me.vladislav.fs.apis.ArgumentsApi;
 import me.vladislav.fs.apis.JavaApi;
 import me.vladislav.fs.apis.UnknownOperationException;
+import me.vladislav.fs.blocks.view.FileDescription;
 import me.vladislav.fs.util.ResourceUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Component;
@@ -89,9 +90,14 @@ public class ArgumentsApiImpl implements ArgumentsApi {
                             .fsPath(arguments.fileSystemPath())
                             .build()
             );
-            case OPERATION_LIST_FILES -> System.out.println(listFiles(ListFilesRequest.builder()
-                    .fsPath(arguments.fileSystemPath())
-                    .build()));
+            case OPERATION_LIST_FILES -> {
+                List<FileDescription> descriptions = listFiles(ListFilesRequest.builder()
+                        .fsPath(arguments.fileSystemPath())
+                        .build());
+                descriptions.forEach(fileDescription ->
+                        System.out.printf("%s %sBytes\n",
+                                fileDescription.getFilename(), fileDescription.getFileSize()));
+            }
             case OPERATION_MOVE_FILE -> moveFile(MoveFileRequest.builder()
                     .fsPath(arguments.fileSystemPath())
                     .filename(arguments.filename())
@@ -154,7 +160,7 @@ public class ArgumentsApiImpl implements ArgumentsApi {
     }
 
     @Override
-    public List<String> listFiles(ListFilesRequest request) {
+    public List<FileDescription> listFiles(ListFilesRequest request) {
         return javaApi.listFiles(request);
     }
 
