@@ -1,4 +1,4 @@
-# Documentation with diagrams here - etc/fs_arch.drawio
+# Documentation with diagrams here - etc/fs_arch.drawio.png
 ---
 
 # Task
